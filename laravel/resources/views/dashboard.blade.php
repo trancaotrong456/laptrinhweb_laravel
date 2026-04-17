@@ -20,9 +20,9 @@
             <li><a href="{{ route('signout') }}">Đăng xuất</a></li>
             @if(Auth::user()->role == 1)
             <li><a href="{{ route('user.listUser') }}">Quản lý User</a></li>
+            @endif
             <li><a href="{{ route('categories.index') }}">Danh mục</a></li>
             <li><a href="{{ route('posts.index') }}">Tin tức</a></li>
-            @endif
             @endguest
         </ul>
     </nav>
