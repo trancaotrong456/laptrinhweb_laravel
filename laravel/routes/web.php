@@ -14,7 +14,7 @@ use App\Http\Controllers\PostController;
 
 // Trang chủ (Trang này ai cũng xem được, giúp tránh lỗi vòng lặp Redirect)
 Route::get('/', function () {
-    return view('index'); 
+    return view('index');
 })->name('home');
 
 // Nhóm Route Đăng nhập & Đăng ký
@@ -31,14 +31,14 @@ Route::post('/create', [CrudUserController::class, 'postUser'])->name('user.post
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    
+
     // Đăng xuất
     Route::get('/signout', [CrudUserController::class, 'signOut'])->name('signout');
 
     /* --- KHU VỰC DÀNH RIÊNG CHO ADMIN (role = 1) --- */
     // Bảo vệ bằng middleware 'admin' sếp đã tạo
     Route::middleware(['admin'])->group(function () {
-        
+
         // Bảng điều khiển thống kê
         Route::get('/dashboard', [CrudUserController::class, 'dashboard'])->name('dashboard');
 
@@ -53,7 +53,14 @@ Route::middleware(['auth'])->group(function () {
     /* --- KHU VỰC DÀNH CHO CẢ USER THƯỜNG VÀ ADMIN --- */
     // Khách hàng (role=0) có thể vào xem sản phẩm, bài viết thoải mái
     Route::resource('products', ProductController::class);
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+
+    Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
+
+    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::resource('categories', CategoryController::class);
     Route::resource('posts', PostController::class);
-    
 });
