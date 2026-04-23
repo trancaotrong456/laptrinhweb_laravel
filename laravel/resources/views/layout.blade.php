@@ -19,7 +19,7 @@
         font-family: 'Inter', sans-serif;
     }
 
-    /* Navbar Ultra Modern */
+
     .navbar {
         background: rgba(255, 255, 255, .95);
         backdrop-filter: blur(20px);

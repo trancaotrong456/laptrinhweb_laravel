@@ -64,7 +64,7 @@ class CartController extends Controller
         Session::put('cart', $cart);
         return redirect()->route('cart.index')->with('success', 'Đã xóa sản phẩm!');
     }
-
+//    public function clear()
     public function clear()
     {
         Session::forget('cart');

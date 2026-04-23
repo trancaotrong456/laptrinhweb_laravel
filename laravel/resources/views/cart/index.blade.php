@@ -2,7 +2,7 @@
 @section('title', '🛒 Giỏ hàng - Siêu thị Mini')
 
 @section('content')
-
+<!-- Page title -->
 <!-- Cart Hero -->
 <section class="py-5 bg-light">
     <div class="container d-flex justify-content-between align-items-center">
