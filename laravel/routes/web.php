@@ -5,16 +5,15 @@ use App\Http\Controllers\CrudUserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\CartController;
 
-/*
-|--------------------------------------------------------------------------
-| 1. CÁC ROUTE CÔNG KHAI (Chưa đăng nhập cũng vào được)
-|--------------------------------------------------------------------------
-*/
+
 
 // Trang chủ (Trang này ai cũng xem được, giúp tránh lỗi vòng lặp Redirect)
 Route::get('/', function () {
-    return view('index');
+    $products = \App\Models\Product::take(8)->get();
+    $banners = \App\Models\Post::where('type', 1)->orderBy('priority', 'desc')->take(4)->get();
+    return view('index', compact('products', 'banners'));
 })->name('home');
 
 // Nhóm Route Đăng nhập & Đăng ký
@@ -31,6 +30,13 @@ Route::post('/create', [CrudUserController::class, 'postUser'])->name('user.post
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+
+    // Cart routes
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart/{productId}', [CartController::class, 'remove'])->name('cart.remove');
+    Route::get('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 
     // Đăng xuất
     Route::get('/signout', [CrudUserController::class, 'signOut'])->name('signout');
