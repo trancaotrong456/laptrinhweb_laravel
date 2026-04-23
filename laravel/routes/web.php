@@ -56,4 +56,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::resource('posts', PostController::class);
     
+    Route::resource('posts', PostController::class);
+// Thêm 2 dòng này cho phần Bài viết / Khuyến mãi
+Route::get('/khuyen-mai', [PostController::class, 'index'])->name('posts.index');
+Route::get('/khuyen-mai/them-moi', [PostController::class, 'create'])->name('posts.create');
+Route::post('/khuyen-mai/luu', [PostController::class, 'store'])->name('posts.store');
+Route::get('/khuyen-mai/{id}/sua', [PostController::class, 'edit'])->name('posts.edit');
+Route::put('/khuyen-mai/{id}', [PostController::class, 'update'])->name('posts.update');
 });
