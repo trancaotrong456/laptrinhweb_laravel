@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post; // Nhớ phải có dòng này ở đầu
+use App\Models\Post; // Giữ lại dòng này vì sếp cần dùng Model Post
 use Illuminate\Http\Request;
 
 class PostController extends Controller

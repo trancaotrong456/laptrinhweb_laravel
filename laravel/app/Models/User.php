@@ -10,25 +10,21 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    // Đã xóa bỏ các từ khóa bị lặp
-   protected $fillable = [
-    'name',
-    'email',
-    'password',
-    'phone',
-    'address',
-    'role', // Nhớ thêm role vào đây để có thể lưu dữ liệu
-];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'dob',
+        'gender',
+        'phone',
+        'address',
+        'role',
+    ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'password' => 'hashed',
-        ];
-    }
+    // No hashed cast - plain text passwords
 }

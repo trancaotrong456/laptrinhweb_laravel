@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User; // Lưu ý: Nếu bạn đang dùng bảng sv_users cho việc login thì gọi Model SvUser nhé
+use App\Models\User; 
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Post;
@@ -14,29 +14,25 @@ class CrudUserController extends Controller
 {
     public function login() { return view('crud_user.login'); }
 
-   public function authUser(Request $request) {
-    // 1. Kiểm tra dữ liệu gửi lên
-    $request->validate([
-        'email' => 'required',
-        'password' => 'required',
-    ]);
+    public function authUser(Request $request) {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-    // 2. Tìm trong database xem có ai dùng email này không
-    $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
+        
+        if ($user && $user->password === $request->password) {
+            Auth::login($user, $request->boolean('remember'));
+            $request->session()->regenerate();
+            
+            return redirect()->intended(route('dashboard'));
+        }
 
-    // 3. Nếu tìm thấy user VÀ mật khẩu gõ vào khớp Y CHANG mật khẩu trong database
-    if ($user && $user->password === $request->password) {
-        
-        // Ép Laravel cho phép đăng nhập luôn không cần hỏi nhiều!
-        Auth::login($user);
-        
-        // Đăng nhập xong thì đá về Dashboard
-        return redirect()->route('dashboard'); 
+        return back()->withErrors([
+            'email' => 'Email hoặc mật khẩu không chính xác.',
+        ])->onlyInput('email');
     }
-
-    // 4. Nếu sai email hoặc mật khẩu
-    return redirect("login")->withErrors(['email' => 'Email hoặc mật khẩu không chính xác.']);
-}
 
     public function createUser() { return view('crud_user.create'); }
 
@@ -45,44 +41,31 @@ class CrudUserController extends Controller
             'name' => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
         ]);
-
-        $likesString = $request->like ?? '';
 
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            // Thêm các trường mới từ giao diện EXE1:
-            'dob' => $request->dob,
-            'gender' => $request->gender,
-            'job' => $request->job,
-            'like' => $likesString, 
-            
-            // Giữ lại nếu database bạn vẫn còn 2 cột này, nếu xóa rồi thì bỏ đi nhé
-            'phone' => $request->phone, 
-            'address' => $request->address, 
+            'password' => $request->password,
+            'phone' => $request->phone,
+            'address' => $request->address,
         ]);
 
-        // withSuccess sẽ gửi kèm một thông báo màu xanh lên trang list
         return redirect()->route('user.listUser')->withSuccess('Đăng ký người dùng thành công!');
     }
 
     public function listUser(Request $request) {
-        // Khởi tạo truy vấn
         $query = User::query();
 
-        // Kiểm tra xem có từ khóa tìm kiếm (search) được gửi lên không
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            // Lọc ra những User có tên hoặc email chứa từ khóa tìm kiếm
             $query->where('name', 'LIKE', '%' . $search . '%')
                   ->orWhere('email', 'LIKE', '%' . $search . '%');
         }
 
-        // Dùng paginate(5) để phân trang (5 người/trang) thay vì get() toàn bộ
         $users = $query->paginate(5); 
-
         return view('crud_user.list', compact('users'));
     }
 
@@ -102,23 +85,16 @@ class CrudUserController extends Controller
             'email' => 'required|email',
         ]);
 
-        $user = User::find($id);
+        $user = User::findOrFail($id);
 
-        $likesString = $request->like ?? '';
-
-        // Cập nhật thông tin
+        // Cập nhật thông tin cơ bản
         $user->name = $request->name;
         $user->email = $request->email;
         $user->dob = $request->dob;
         $user->gender = $request->gender;
-        $user->job = $request->job;
-        $user->like = $likesString;
-
-        // Nếu database bạn còn 2 cột này:
         $user->phone = $request->phone;
         $user->address = $request->address;
 
-        // Chỉ cập nhật mật khẩu nếu người dùng có nhập mật khẩu mới
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
         }
@@ -137,20 +113,12 @@ class CrudUserController extends Controller
         Auth::logout();
         return redirect()->route('login');
     }
-    /*
-    |--------------------------------------------------------------------------
-    | CHỨC NĂNG CỦA TRƯỞNG NHÓM: THỐNG KÊ TỔNG QUAN
-    |--------------------------------------------------------------------------
-    */
+
     public function dashboard() {
-        // Đếm tổng số lượng từ các bảng (Model) của các thành viên khác
-        // Chú ý: Các bạn kia phải tạo Model xong thì lệnh này mới chạy không lỗi
-        $totalUsers = \App\Models\User::count();
-        
-        // Dùng try-catch hoặc kiểm tra class_exists để tránh lỗi khi các bạn kia chưa kịp tạo Model
-        $totalProducts = class_exists('\App\Models\Product') ? \App\Models\Product::count() : 0;
-        $totalCategories = class_exists('\App\Models\Category') ? \App\Models\Category::count() : 0;
-        $totalPosts = class_exists('\App\Models\Post') ? \App\Models\Post::count() : 0;
+        $totalUsers = User::count();
+        $totalProducts = class_exists('\App\Models\Product') ? Product::count() : 0;
+        $totalCategories = class_exists('\App\Models\Category') ? Category::count() : 0;
+        $totalPosts = class_exists('\App\Models\Post') ? Post::count() : 0;
 
         return view('crud_user.dashboard', compact(
             'totalUsers', 
