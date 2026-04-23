@@ -2,15 +2,11 @@
 
 namespace App\Http\Controllers;
 
-<<<<<<< HEAD
 use App\Models\Post; // Nhớ phải có dòng này ở đầu
-=======
->>>>>>> feature/product
 use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-<<<<<<< HEAD
     
    public function index()
 {
@@ -83,61 +79,3 @@ class PostController extends Controller
     // 5. Quay về trang danh sách và báo tin vui
     return redirect()->route('posts.index')->with('success', 'Đã cập nhật quảng cáo thành công!');
 }}
-=======
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
-}
->>>>>>> feature/product
