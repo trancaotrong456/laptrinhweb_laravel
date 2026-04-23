@@ -7,11 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CartController;
 
-/*
-|--------------------------------------------------------------------------
-| 1. CÁC ROUTE CÔNG KHAI (Chưa đăng nhập cũng vào được)
-|--------------------------------------------------------------------------
-*/
+
 
 // Trang chủ (Trang này ai cũng xem được, giúp tránh lỗi vòng lặp Redirect)
 Route::get('/', function () {

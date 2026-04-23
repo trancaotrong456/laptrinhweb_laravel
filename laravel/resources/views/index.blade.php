@@ -1,6 +1,6 @@
 @extends('layout')
 @section('title', 'Trang chủ - Siêu thị Mini')
-
+<!-- @section('content')-->
 @section('content')
 <div class="hero-section text-center py-5 bg-gradient-primary">
     <div class="container">
