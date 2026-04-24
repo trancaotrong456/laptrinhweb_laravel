@@ -40,9 +40,9 @@
 
                 <select name="category_id" class="custom-select">
                     <option value="">-- Chọn danh mục --</option>
-                    <option value="1">Điện thoại</option>
-                    <option value="2">Laptop</option>
-                    <option value="3">Phụ kiện</option>
+                    @foreach ($categories as $cate)
+                    <option value="{{ $c->id }}">{{ $c-> name }}</option>
+                    @endforeach
                 </select>
             </div>
 
