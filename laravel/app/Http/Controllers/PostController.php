@@ -110,14 +110,33 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
+<<<<<<< Updated upstream
         // Xóa ảnh nếu có
         if ($post->image && File::exists(public_path('images/' . $post->image))) {
             File::delete(public_path('images/' . $post->image));
+=======
+        // 5. Quay về trang danh sách và báo tin vui
+        return redirect()->route('posts.index')->with('success', 'Đã cập nhật quảng cáo thành công!');
+    }
+
+    // 3. Xử lý xóa khuyến mãi
+    public function destroy(string $id)
+    {
+        $post = Post::findOrFail($id);
+
+        // Xóa ảnh trong thư mục public/images nếu có
+        if ($post->image && file_exists(public_path('images/' . $post->image))) {
+            unlink(public_path('images/' . $post->image));
+>>>>>>> Stashed changes
         }
 
         $post->delete();
 
+<<<<<<< Updated upstream
         return redirect()->route('posts.index')
             ->with('success', 'Xóa khuyến mãi thành công!');
+=======
+        return redirect()->route('posts.index')->with('success', 'Đã xóa khuyến mãi thành công!');
+>>>>>>> Stashed changes
     }
 }
