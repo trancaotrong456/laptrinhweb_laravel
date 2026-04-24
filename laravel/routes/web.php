@@ -68,13 +68,37 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::resource('categories', CategoryController::class);
+<<<<<<< Updated upstream
     Route::resource('posts', PostController::class);
     
     Route::resource('posts', PostController::class);
 // Thêm 2 dòng này cho phần Bài viết / Khuyến mãi
-Route::get('/khuyen-mai', [PostController::class, 'index'])->name('posts.index');
-Route::get('/khuyen-mai/them-moi', [PostController::class, 'create'])->name('posts.create');
-Route::post('/khuyen-mai/luu', [PostController::class, 'store'])->name('posts.store');
-Route::get('/khuyen-mai/{id}/sua', [PostController::class, 'edit'])->name('posts.edit');
-Route::put('/khuyen-mai/{id}', [PostController::class, 'update'])->name('posts.update');
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/khuyen-mai', [PostController::class, 'index'])->name('posts.index');
+    Route::get('/khuyen-mai/them-moi', [PostController::class, 'create'])->name('posts.create');
+    Route::post('/khuyen-mai/luu', [PostController::class, 'store'])->name('posts.store');
+
+    Route::get('/khuyen-mai/{id}/sua', [PostController::class, 'edit'])->name('posts.edit');
+    Route::put('/khuyen-mai/{id}', [PostController::class, 'update'])->name('posts.update');
+
+    Route::delete('/khuyen-mai/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+});
+=======
+
+    /* --- KHU VỰC DÀNH CHO CẢ USER THƯỜNG VÀ ADMIN --- */
+    // Xem khuyến mãi (ai cũng xem được)
+    Route::get('/khuyen-mai', [PostController::class, 'index'])->name('posts.index');
+
+    /* --- KHU VỰC DÀNH RIÊNG CHO ADMIN (role = 1) --- */
+    Route::middleware(['admin'])->group(function () {
+        // Quản lý Khuyến mãi (chỉ Admin được thêm, sửa, xóa)
+        Route::get('/khuyen-mai/them-moi', [PostController::class, 'create'])->name('posts.create');
+        Route::post('/khuyen-mai/luu', [PostController::class, 'store'])->name('posts.store');
+        Route::get('/khuyen-mai/{id}/sua', [PostController::class, 'edit'])->name('posts.edit');
+        Route::put('/khuyen-mai/{id}', [PostController::class, 'update'])->name('posts.update');
+        Route::delete('/khuyen-mai/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
+    });
+>>>>>>> Stashed changes
 });
