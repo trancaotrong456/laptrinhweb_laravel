@@ -41,20 +41,33 @@
                 <td>{{ $item['name'] }}</td>
 
                 <td class="text-center">
+<<<<<<< HEAD
                     ₫{{ number_format($item['price']) }}
+=======
+                    ₫{{ number_format($item['price'] ?? 0) }}
+>>>>>>> feature/posts
                 </td>
 
                 <td class="text-center">
                     <form method="POST" action="{{ route('cart.update') }}">
                         @csrf
                         <input type="hidden" name="product_id" value="{{ $id }}">
+<<<<<<< HEAD
                         <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1" style="width:70px">
+=======
+                        <input type="number" name="quantity" value="{{ $item['quantity'] ?? 1 }}" min="1"
+                            style="width:70px">
+>>>>>>> feature/posts
                         <button class="btn btn-sm btn-primary">OK</button>
                     </form>
                 </td>
 
                 <td class="text-end">
+<<<<<<< HEAD
                     ₫{{ number_format($item['price'] * $item['quantity']) }}
+=======
+                    ₫{{ number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 1)) }}
+>>>>>>> feature/posts
                 </td>
 
                 <td>
