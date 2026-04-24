@@ -68,7 +68,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::resource('categories', CategoryController::class);
-<<<<<<< Updated upstream
+
     Route::resource('posts', PostController::class);
     
     Route::resource('posts', PostController::class);
@@ -85,7 +85,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/khuyen-mai/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
 
 });
-=======
+
 
     /* --- KHU VỰC DÀNH CHO CẢ USER THƯỜNG VÀ ADMIN --- */
     // Xem khuyến mãi (ai cũng xem được)
@@ -100,5 +100,5 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/khuyen-mai/{id}', [PostController::class, 'update'])->name('posts.update');
         Route::delete('/khuyen-mai/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
     });
->>>>>>> Stashed changes
+
 });
