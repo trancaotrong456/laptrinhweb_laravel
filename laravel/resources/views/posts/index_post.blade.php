@@ -66,11 +66,121 @@
                             ⚙️ Chỉnh sửa (Admin)
                         </a>
                         @endif
+    {{-- ================= BANNER ================= --}}
+    <div id="promoCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner rounded shadow-sm">
+
+            @forelse($sliderPosts as $index => $post)
+            <div class="carousel-item {{ $index == 0 ? 'active' : '' }}">
+
+                <img src="{{ $post->image ? asset('images/'.$post->image) : 'https://via.placeholder.com/1200x450' }}"
+                    class="d-block w-100" style="height: 450px; object-fit: cover;">
+
+                <div class="carousel-caption bg-dark bg-opacity-50 rounded p-3">
+
+                    {{-- ADMIN ACTION --}}
+                    @if(Auth::check() && Auth::user()->role == 1)
+                    <div class="mb-2">
+                        <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-warning btn-sm">
+                            ✏️ Sửa
+                        </a>
+
+                        <form action="{{ route('posts.destroy', $post->id) }}" method="POST" class="d-inline"
+                            onsubmit="return confirm('Xóa thật không?')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-danger btn-sm">
+                                🗑️ Xóa
+                            </button>
+                        </form>
+                    </div>
+                    @endif
+
+                    <h4>{{ $post->title }}</h4>
+                    <p>{{ Str::limit($post->content, 60) }}</p>
+                </div>
+
+            </div>
+            @empty
+            <p class="text-center mt-3">Chưa có banner</p>
+            @endforelse
+
+        </div>
+
+        <button class="carousel-control-prev" data-bs-target="#promoCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+
+        <button class="carousel-control-next" data-bs-target="#promoCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+
+    {{-- BUTTON ADD --}}
+    @if(Auth::check() && Auth::user()->role == 1)
+    <div class="text-end mt-3">
+        <a href="{{ route('posts.create') }}" class="btn btn-primary">
+            ➕ Thêm khuyến mãi
+        </a>
+    </div>
+    @endif
+
+    {{-- ================= CARD ================= --}}
+    <h3 class="mt-5 mb-4">🔥 Ưu đãi khác</h3>
+
+    <div class="row">
+        @forelse($smallPosts as $post)
+        <div class="col-md-4 mb-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <img src="{{ $post->image ? asset('images/'.$post->image) : 'https://via.placeholder.com/400x300' }}"
+                    class="card-img-top" style="height:200px;object-fit:cover;">
+
+                <div class="card-body d-flex flex-column">
+                    <h5>{{ $post->title }}</h5>
+                    <p class="text-muted">
+                        {{ Str::limit($post->content, 80) }}
+                    </p>
+
+                    <div class="mt-auto">
+
+                        <a href="#" class="btn btn-outline-danger btn-sm w-100 mb-2">
+                            Xem ngay
+                        </a>
+
+                        {{-- ADMIN --}}
+                        @if(Auth::check() && Auth::user()->role == 1)
+
+                        <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-warning btn-sm w-100 mb-2">
+                            ✏️ Sửa
+                        </a>
+
+                        <form action="{{ route('posts.destroy', $post->id) }}" method="POST"
+                            onsubmit="return confirm('Xóa thật không?')">
+                            @csrf
+                            @method('DELETE')
+
+                            <button class="btn btn-danger btn-sm w-100">
+                                🗑️ Xóa
+                            </button>
+                        </form>
+
+                        @endif
+
                     </div>
                 </div>
+
             </div>
+
         </div>
+<<<<<<< Updated upstream
         @endforeach
+=======
+        @empty
+        <p>Chưa có khuyến mãi</p>
+        @endforelse
+>>>>>>> Stashed changes
     </div>
 
 </div>

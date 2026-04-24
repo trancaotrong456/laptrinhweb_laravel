@@ -8,4 +8,11 @@ class Post extends Model
 {
     // Cấp quyền cho phép lưu 3 cột này (Chuẩn theo file Migration mới nhất)
     protected $fillable = ['title', 'content', 'image'];
+    protected $fillable = [
+        'title',
+        'content',
+        'image',
+        'type',
+        'priority'
+    ];
 }
