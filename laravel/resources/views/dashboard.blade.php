@@ -72,6 +72,17 @@
     </nav>
 
     <div class="container" style="padding-bottom: 60px;">
+            <li><a href="{{ route('signout') }}">Đăng xuất</a></li>
+            @if(Auth::user()->role == 1)
+            <li><a href="{{ route('user.listUser') }}">Quản lý User</a></li>
+            <li><a href="{{ route('categories.index') }}">Danh mục</a></li>
+            <li><a href="{{ route('posts.index') }}">Tin tức</a></li>
+            @endif
+            @endguest
+        </ul>
+    </nav>
+
+    <div class="container">
         @if(session('success'))
         <div
             style="background: #d4edda; color: #155724; padding: 10px; margin: 20px auto; max-width: 400px; border-radius: 5px;">
@@ -85,6 +96,8 @@
     <footer
         style="background-color: #0000FF; color: white; padding: 10px; position: fixed; bottom: 0; width: 100%; z-index: 1000;">
         <p style="text-align: center; margin: 0;">&copy; Trần Cao Trọng - 24211TT1101</p>
+    <footer style="background-color: #0000FF; color: white; padding: 10px; position: fixed; bottom: 0; width: 100%;">
+        <p style="text-align: center; margin: 0;"></p>
     </footer>
 </body>
 

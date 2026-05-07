@@ -8,20 +8,21 @@
 
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
     body {
         font-family: 'Inter', sans-serif;
+        background: #f8f9fa;
     }
 
     /* NAVBAR */
     .navbar-custom {
-        background: rgba(255, 255, 255, 0.85);
+        background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(15px);
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-        transition: 0.3s;
     }
 
     .navbar-brand {
@@ -70,6 +71,7 @@
         position: relative;
         font-size: 1.3rem;
         color: #667eea;
+        transition: .3s;
     }
 
     .cart-btn:hover {
@@ -115,6 +117,15 @@
 
     main {
         padding-top: 90px;
+        min-height: 80vh;
+    }
+
+    .alert {
+        border-radius: 15px;
+    }
+
+    footer {
+        margin-top: 60px;
     }
     </style>
 </head>
@@ -139,30 +150,86 @@
 
                 <!-- MENU -->
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">Trang chủ</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('products.index') }}">Sản phẩm</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('posts.index') }}">Khuyến mãi</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ route('categories.index') }}">Danh mục</a></li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('home') }}">Trang chủ</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('products.index') }}">Sản phẩm</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('posts.index') }}">Khuyến mãi</a>
+                    </li>
+
+                    <!-- DROPDOWN DANH MỤC -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Danh mục
+                        </a>
+
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('categories.do_uong') }}">
+                                    🥤 Đồ uống
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="{{ route('categories.thuc_pham') }}">
+                                    🍚 Thực phẩm
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="{{ route('categories.gia_dung') }}">
+                                    🏠 Gia dụng
+                                </a>
+                            </li>
+
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item" href="{{ route('categories.index') }}">
+                                    📋 Tất cả danh mục
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
 
                 <!-- SEARCH -->
                 <form class="d-flex me-3 search-box">
                     <input class="form-control" type="search" placeholder="Tìm sản phẩm...">
-                    <button class="btn btn-search"><i class="fas fa-search"></i></button>
+                    <button class="btn btn-search">
+                        <i class="fas fa-search"></i>
+                    </button>
                 </form>
 
                 <!-- RIGHT -->
                 @guest
+
                 <div class="d-flex gap-2">
-                    <a class="btn btn-outline-primary rounded-pill px-4" href="{{ route('login') }}">Đăng nhập</a>
-                    <a class="btn btn-primary rounded-pill px-4" href="{{ route('user.createUser') }}">Đăng ký</a>
+                    <a class="btn btn-outline-primary rounded-pill px-4" href="{{ route('login') }}">
+                        Đăng nhập
+                    </a>
+
+                    <a class="btn btn-primary rounded-pill px-4" href="{{ route('user.createUser') }}">
+                        Đăng ký
+                    </a>
                 </div>
+
                 @else
+
                 <div class="d-flex align-items-center gap-3">
 
                     <!-- CART -->
                     <a href="{{ route('cart.index') }}" class="cart-btn">
                         <i class="fas fa-shopping-cart"></i>
+
                         <span class="cart-badge">
                             {{ Session::has('cart') ? count(Session::get('cart')) : 0 }}
                         </span>
@@ -170,22 +237,40 @@
 
                     <!-- USER -->
                     <div class="dropdown">
+
                         <div class="user-box" data-bs-toggle="dropdown">
+
                             <div class="avatar">
                                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                             </div>
-                            <span class="d-none d-lg-inline">{{ Auth::user()->name }}</span>
+
+                            <span class="d-none d-lg-inline">
+                                {{ Auth::user()->name }}
+                            </span>
+
                             <i class="fas fa-chevron-down small"></i>
                         </div>
 
                         <ul class="dropdown-menu dropdown-menu-end">
-                            <li class="dropdown-header">{{ Auth::user()->name }}</li>
+
+                            <li class="dropdown-header">
+                                {{ Auth::user()->name }}
+                            </li>
 
                             @if(Auth::user()->role == 1)
-                            <li><a class="dropdown-item" href="{{ route('dashboard') }}">Dashboard</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('dashboard') }}">
+                                    Dashboard
+                                </a>
+                            </li>
                             @endif
 
-                            <li><a class="dropdown-item" href="{{ route('cart.index') }}">Giỏ hàng</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('cart.index') }}">
+                                    Giỏ hàng
+                                </a>
+                            </li>
+
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
@@ -193,13 +278,17 @@
                             <li>
                                 <form method="GET" action="{{ route('signout') }}">
                                     @csrf
-                                    <button class="dropdown-item text-danger">Đăng xuất</button>
+                                    <button class="dropdown-item text-danger">
+                                        Đăng xuất
+                                    </button>
                                 </form>
                             </li>
+
                         </ul>
                     </div>
 
                 </div>
+
                 @endguest
 
             </div>
@@ -207,13 +296,34 @@
     </nav>
 
     <!-- CONTENT -->
-    <main>
+    <main class="container">
+
+        @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show mt-3">
+            {{ session('success') }}
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert">
+            </button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mt-3">
+            {{ session('error') }}
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert">
+            </button>
+        </div>
+        @endif
+
         @yield('content')
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-dark text-white text-center py-4 mt-5">
-        <p class="mb-0">© 2024 Siêu thị Mini - Trần Cao Trọng</p>
+    <footer class="bg-dark text-white text-center py-4">
+        <p class="mb-0">
+            © 2024 Siêu thị Mini - Trần Cao Trọng
+        </p>
     </footer>
 
     <!-- JS -->

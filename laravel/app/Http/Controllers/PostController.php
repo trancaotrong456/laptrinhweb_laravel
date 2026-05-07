@@ -2,15 +2,7 @@
 
 namespace App\Http\Controllers;
 
-<<<<<<< HEAD
-use App\Models\Post; // Giữ lại dòng này vì sếp cần dùng Model Post
-=======
-<<<<<<< Updated upstream
-use App\Models\Post; // Nhớ phải có dòng này ở đầu
-=======
 use App\Models\Post;
->>>>>>> Stashed changes
->>>>>>> feature/posts
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
@@ -39,7 +31,7 @@ class PostController extends Controller
     // ================= LƯU MỚI =================
     public function store(Request $request)
     {
-        // VALIDATE (QUAN TRỌNG)
+        // VALIDATE
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required',
@@ -52,9 +44,13 @@ class PostController extends Controller
 
         // Upload ảnh
         if ($request->hasFile('image')) {
+
             $image = $request->file('image');
+
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
             $image->move(public_path('images'), $imageName);
+
             $data['image'] = $imageName;
         }
 
@@ -68,6 +64,7 @@ class PostController extends Controller
     public function edit($id)
     {
         $post = Post::findOrFail($id);
+
         return view('posts.edit_post', compact('post'));
     }
 
@@ -92,12 +89,15 @@ class PostController extends Controller
 
             // Xóa ảnh cũ
             if ($post->image && File::exists(public_path('images/' . $post->image))) {
+
                 File::delete(public_path('images/' . $post->image));
             }
 
             // Upload ảnh mới
             $image = $request->file('image');
+
             $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
             $image->move(public_path('images'), $imageName);
 
             $data['image'] = $imageName;
@@ -114,33 +114,15 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
-<<<<<<< Updated upstream
         // Xóa ảnh nếu có
         if ($post->image && File::exists(public_path('images/' . $post->image))) {
+
             File::delete(public_path('images/' . $post->image));
-=======
-        // 5. Quay về trang danh sách và báo tin vui
-        return redirect()->route('posts.index')->with('success', 'Đã cập nhật quảng cáo thành công!');
-    }
-
-    // 3. Xử lý xóa khuyến mãi
-    public function destroy(string $id)
-    {
-        $post = Post::findOrFail($id);
-
-        // Xóa ảnh trong thư mục public/images nếu có
-        if ($post->image && file_exists(public_path('images/' . $post->image))) {
-            unlink(public_path('images/' . $post->image));
->>>>>>> Stashed changes
         }
 
         $post->delete();
 
-<<<<<<< Updated upstream
         return redirect()->route('posts.index')
             ->with('success', 'Xóa khuyến mãi thành công!');
-=======
-        return redirect()->route('posts.index')->with('success', 'Đã xóa khuyến mãi thành công!');
->>>>>>> Stashed changes
     }
 }
