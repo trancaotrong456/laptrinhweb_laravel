@@ -1,0 +1,251 @@
+/* Basic reset and font setup */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.content {
+    display: flex;
+    justify-content: center;
+    /* ngang */
+    align-items: center;
+    /* dọc */
+    height: 80vh;
+    /* chiều cao */
+}
+
+/* Navigation Bar Styling */
+nav {
+    background-color: #0056b3;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 20px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+nav ul li a:hover {
+    color: #cce5ff;
+}
+
+/* Form Container Styling */
+form {
+    background-color: #ffffff;
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #1a1a1a;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+
+/* Input Fields and Labels */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    /* Ensures padding doesn't push width past 100% */
+    font-size: 14px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    border-color: #0056b3;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 86, 179, 0.2);
+}
+
+/* Submit Button */
+input[type="submit"] {
+    width: 100%;
+    background-color: #0056b3;
+    color: white;
+    padding: 12px;
+    margin-top: 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #004494;
+}
+
+/* Checkbox Alignment */
+input[type="checkbox"] {
+    margin-top: 20px;
+    margin-right: 8px;
+    transform: translateY(1px);
+    cursor: pointer;
+}
+
+label[for="remember"] {
+    display: inline;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+/* Gộp class .card để nó có khung viền đổ bóng y hệt form đăng nhập */
+form,
+.card {
+    background-color: #ffffff;
+    max-width: 400px;
+    margin: 40px auto;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card h1 {
+    text-align: center;
+    color: #1a1a1a;
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+/* Nút bấm thẻ a cho trang View */
+.btn-blue {
+    display: inline-block;
+    background-color: #0056b3;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.btn-blue:hover {
+    background-color: #004494;
+}
+
+/* Định dạng chữ cho trang View */
+.detail-info p {
+    font-size: 16px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.detail-info strong {
+    display: inline-block;
+    width: 100px;
+    color: #555;
+}
+
+/* Mở rộng form cho trang Danh sách */
+.table-card {
+    max-width: 700px;
+    /* Bảng cần rộng hơn form đăng nhập */
+}
+
+/* Làm đẹp bảng (Table) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+}
+
+table th,
+table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+table th {
+    background-color: #0056b3;
+    color: white;
+}
+
+table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+table td a {
+    color: #0056b3;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+table td a:hover {
+    text-decoration: underline;
+}
+
+/* Làm đẹp thanh phân trang (Pagination) */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    color: #0056b3;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.page-link:hover {
+    background-color: #0056b3;
+    color: white;
+}
+
+.page-link.active {
+    background-color: #0056b3;
+    color: white;
+    border-color: #0056b3;
+}
+
+.page-link.disabled {
+    color: #999;
+    border-color: #ddd;
+    pointer-events: none;
+}
