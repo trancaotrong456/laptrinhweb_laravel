@@ -6,6 +6,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 
 
 
@@ -37,6 +38,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart/{productId}', [CartController::class, 'remove'])->name('cart.remove');
     Route::get('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+
+    // Checkout routes
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
 
     // Đăng xuất
     Route::get('/signout', [CrudUserController::class, 'signOut'])->name('signout');

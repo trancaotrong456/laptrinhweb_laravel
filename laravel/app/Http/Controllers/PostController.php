@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post; // Giữ lại dòng này vì sếp cần dùng Model Post
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -25,17 +25,26 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Lấy toàn bộ dữ liệu từ Form
+        // VALIDATE
+        $request->validate([
+            'title'    => 'required|string|max:255',
+            'content'  => 'required',
+            'type'     => 'required|in:0,1',
+            'priority' => 'nullable|integer',
+            'image'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+        ]);
+
         $data = $request->all();
 
         // 2. Xử lý Upload hình ảnh (Nếu có chọn ảnh)
         if ($request->hasFile('image')) {
+
             $image = $request->file('image');
-            // Đổi tên ảnh để không bị trùng (VD: 1691234567.jpg)
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            // Lưu ảnh vào thư mục public/images
+
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
             $image->move(public_path('images'), $imageName);
-            // Ghi tên ảnh vào mảng data để lưu xuống DB
+
             $data['image'] = $imageName;
         }
 
@@ -49,7 +58,8 @@ class PostController extends Controller
 // 1. Hiển thị trang chỉnh sửa
     public function edit(string $id)
     {
-        $post = Post::findOrFail($id); // Tìm bài viết, không thấy thì báo lỗi 404
+        $post = Post::findOrFail($id);
+
         return view('posts.edit_post', compact('post'));
     }
 
@@ -59,23 +69,60 @@ class PostController extends Controller
     // 1. Tìm bài viết cần sửa
     $post = Post::findOrFail($id);
 
-    // 2. Lấy toàn bộ dữ liệu từ Form (bao gồm title, content, type, priority)
-    $data = $request->all();
+    // ================= CẬP NHẬT =================
+    public function update(Request $request, $id)
+    {
+        $post = Post::findOrFail($id);
 
-    // 3. Xử lý nếu sếp có chọn ảnh mới
-    if ($request->hasFile('image')) {
-        $image = $request->file('image');
-        $imageName = time() . '.' . $image->getClientOriginalExtension();
-        
-        // Sửa lỗi dấu chấm thành dấu mũi tên ở đây luôn sếp nhé!
-        $image->move(public_path('images'), $imageName);
-        
-        $data['image'] = $imageName;
+        // VALIDATE
+        $request->validate([
+            'title'    => 'required|string|max:255',
+            'content'  => 'required',
+            'type'     => 'required|in:0,1',
+            'priority' => 'nullable|integer',
+            'image'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+        ]);
+
+        $data = $request->all();
+
+        // Nếu có ảnh mới
+        if ($request->hasFile('image')) {
+
+            // Xóa ảnh cũ
+            if ($post->image && File::exists(public_path('images/' . $post->image))) {
+                File::delete(public_path('images/' . $post->image));
+            }
+
+            // Upload ảnh mới
+            $image = $request->file('image');
+
+            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+
+            $image->move(public_path('images'), $imageName);
+
+            $data['image'] = $imageName;
+        }
+
+        $post->update($data);
     }
 
     // 4. Cập nhật vào Database
     $post->update($data);
 
-    // 5. Quay về trang danh sách và báo tin vui
-    return redirect()->route('posts.index')->with('success', 'Đã cập nhật quảng cáo thành công!');
-}}
+    // ================= XÓA =================
+    public function destroy($id)
+    {
+        $post = Post::findOrFail($id);
+
+        // Xóa ảnh nếu có
+        if ($post->image && File::exists(public_path('images/' . $post->image))) {
+
+            File::delete(public_path('images/' . $post->image));
+        }
+
+        $post->delete();
+
+        return redirect()->route('posts.index')
+            ->with('success', 'Đã xóa khuyến mãi thành công!');
+    }
+}
