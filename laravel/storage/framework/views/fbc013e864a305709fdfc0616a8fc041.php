@@ -1,0 +1,105 @@
+<?php $__env->startSection('title', '🛒 Giỏ hàng - Siêu thị Mini'); ?>
+
+<?php $__env->startSection('content'); ?>
+<!-- Page title -->
+<!-- Cart Hero -->
+<section class="py-5 bg-light">
+    <div class="container d-flex justify-content-between align-items-center">
+        <h2><i class="fas fa-shopping-cart text-primary me-2"></i>Giỏ hàng</h2>
+        <a href="<?php echo e(route('home')); ?>" class="btn btn-outline-primary">Tiếp tục mua</a>
+    </div>
+</section>
+
+<?php if(empty($cart) || count($cart) == 0): ?>
+
+<!-- EMPTY -->
+<div class="container text-center py-5">
+    <h3 class="text-muted">Giỏ hàng trống</h3>
+    <a href="<?php echo e(route('products.index')); ?>" class="btn btn-primary mt-3">Mua ngay</a>
+</div>
+
+<?php else: ?>
+
+<!-- CART -->
+<div class="container py-4">
+
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th>Sản phẩm</th>
+                <th class="text-center">Giá</th>
+                <th class="text-center">Số lượng</th>
+                <th class="text-end">Thành tiền</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <?php $__currentLoopData = $cart; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $id => $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <tr>
+                <td><?php echo e($item['name']); ?></td>
+
+                <td class="text-center">
+<<<<<<< HEAD
+                    ₫<?php echo e(number_format($item['price'])); ?>
+
+=======
+                    ₫<?php echo e(number_format($item['price'] ?? 0)); ?>
+
+>>>>>>> feature/posts
+                </td>
+
+                <td class="text-center">
+                    <form method="POST" action="<?php echo e(route('cart.update')); ?>">
+                        <?php echo csrf_field(); ?>
+                        <input type="hidden" name="product_id" value="<?php echo e($id); ?>">
+<<<<<<< HEAD
+                        <input type="number" name="quantity" value="<?php echo e($item['quantity']); ?>" min="1" style="width:70px">
+=======
+                        <input type="number" name="quantity" value="<?php echo e($item['quantity'] ?? 1); ?>" min="1"
+                            style="width:70px">
+>>>>>>> feature/posts
+                        <button class="btn btn-sm btn-primary">OK</button>
+                    </form>
+                </td>
+
+                <td class="text-end">
+<<<<<<< HEAD
+                    ₫<?php echo e(number_format($item['price'] * $item['quantity'])); ?>
+
+=======
+                    ₫<?php echo e(number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 1))); ?>
+
+>>>>>>> feature/posts
+                </td>
+
+                <td>
+                    <form method="POST" action="<?php echo e(route('cart.remove', $id)); ?>">
+                        <?php echo csrf_field(); ?>
+                        <?php echo method_field('DELETE'); ?>
+                        <button class="btn btn-danger btn-sm">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+        </tbody>
+    </table>
+
+    <!-- TOTAL -->
+    <div class="text-end mt-4">
+        <h4>
+            Tổng: <span class="text-success">
+                ₫<?php echo e(number_format($total)); ?>
+
+            </span>
+        </h4>
+
+        <a href="#" class="btn btn-success mt-2">Thanh toán</a>
+    </div>
+
+</div>
+
+<?php endif; ?> 
+
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\PHONG\Documents\laravel-demo\laravel\resources\views/cart/index.blade.php ENDPATH**/ ?>
