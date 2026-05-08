@@ -45,18 +45,18 @@ class CartController extends Controller
 
             // Thêm mới
             $cart[$id] = [
-                'name' => $product->name,
-                'price' => $product->price ?? 0,
+                'name'     => $product->name,
+                'price'    => $product->price ?? 0,
                 'quantity' => 1,
-                'image' => $product->image ?? null
+                'image'    => $product->image ?? null
             ];
         }
 
         Session::put('cart', $cart);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Đã thêm vào giỏ!',
+            'success'       => true,
+            'message'       => 'Đã thêm vào giỏ!',
             'totalQuantity' => array_sum(array_column($cart, 'quantity'))
         ]);
     }
@@ -66,12 +66,11 @@ class CartController extends Controller
     {
         $request->validate([
             'product_id' => 'required',
-            'quantity' => 'required|integer|min:0'
+            'quantity'   => 'required|integer|min:0'
         ]);
 
         $productId = $request->product_id;
-
-        $quantity = (int) $request->quantity;
+        $quantity  = (int) $request->quantity;
 
         $cart = Session::get('cart', []);
 
@@ -98,14 +97,12 @@ class CartController extends Controller
         $cart = Session::get('cart', []);
 
         if (isset($cart[$productId])) {
-
             unset($cart[$productId]);
         }
 
         Session::put('cart', $cart);
 
-        return redirect()
-            ->route('cart.index')
+        return redirect()->route('cart.index')
             ->with('success', 'Đã xóa sản phẩm!');
     }
 
@@ -114,8 +111,7 @@ class CartController extends Controller
     {
         Session::forget('cart');
 
-        return redirect()
-            ->route('cart.index')
+        return redirect()->route('cart.index')
             ->with('success', 'Giỏ hàng đã trống!');
     }
 
@@ -129,9 +125,7 @@ class CartController extends Controller
         }, $cart));
 
         if (empty($cart)) {
-
-            return redirect()
-                ->route('cart.index')
+            return redirect()->route('cart.index')
                 ->with('success', 'Giỏ hàng trống!');
         }
 
@@ -144,17 +138,14 @@ class CartController extends Controller
         $cart = Session::get('cart', []);
 
         if (empty($cart)) {
-
-            return redirect()
-                ->route('cart.index')
+            return redirect()->route('cart.index')
                 ->with('success', 'Giỏ hàng trống!');
         }
 
-        // Demo thanh toán
+        // Demo thanh toán -> xóa cart
         Session::forget('cart');
 
-        return redirect()
-            ->route('cart.index')
+        return redirect()->route('cart.index')
             ->with('success', 'Thanh toán thành công!');
     }
 }

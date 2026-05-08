@@ -33,11 +33,11 @@ class PostController extends Controller
     {
         // VALIDATE
         $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required',
-            'type' => 'required|in:0,1',
+            'title'    => 'required|string|max:255',
+            'content'  => 'required',
+            'type'     => 'required|in:0,1',
             'priority' => 'nullable|integer',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+            'image'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
 
         $data = $request->all();
@@ -73,13 +73,24 @@ class PostController extends Controller
     {
         $post = Post::findOrFail($id);
 
+    // 2. Xử lý lưu dữ liệu vừa sửa
+    public function update(Request $request, string $id)
+{
+    // 1. Tìm bài viết cần sửa
+    $post = Post::findOrFail($id);
+
+    // ================= CẬP NHẬT =================
+    public function update(Request $request, $id)
+    {
+        $post = Post::findOrFail($id);
+
         // VALIDATE
         $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required',
-            'type' => 'required|in:0,1',
+            'title'    => 'required|string|max:255',
+            'content'  => 'required',
+            'type'     => 'required|in:0,1',
             'priority' => 'nullable|integer',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
+            'image'    => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
         ]);
 
         $data = $request->all();
@@ -89,7 +100,6 @@ class PostController extends Controller
 
             // Xóa ảnh cũ
             if ($post->image && File::exists(public_path('images/' . $post->image))) {
-
                 File::delete(public_path('images/' . $post->image));
             }
 
@@ -104,10 +114,15 @@ class PostController extends Controller
         }
 
         $post->update($data);
-
-        return redirect()->route('posts.index')
-            ->with('success', 'Cập nhật khuyến mãi thành công!');
     }
+
+    // ================= XÓA =================
+    public function destroy($id)
+    {
+        $post = Post::findOrFail($id);
+
+    // 4. Cập nhật vào Database
+    $post->update($data);
 
     // ================= XÓA =================
     public function destroy($id)
@@ -123,6 +138,6 @@ class PostController extends Controller
         $post->delete();
 
         return redirect()->route('posts.index')
-            ->with('success', 'Xóa khuyến mãi thành công!');
+            ->with('success', 'Đã xóa khuyến mãi thành công!');
     }
 }
