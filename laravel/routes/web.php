@@ -54,19 +54,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/update/{id}', [CrudUserController::class, 'updateUser'])->name('user.updateUser');
         Route::post('/update/{id}', [CrudUserController::class, 'postUpdateUser'])->name('user.postUpdateUser');
         Route::get('/delete/{id}', [CrudUserController::class, 'deleteUser'])->name('user.deleteUser');
+
+        // =========================
+        // Quản lý Products
+        // =========================
+        Route::resource('products', ProductController::class);
     });
 
     /* --- KHU VỰC DÀNH CHO CẢ USER THƯỜNG VÀ ADMIN --- */
     // Khách hàng (role=0) có thể vào xem sản phẩm, bài viết thoải mái
-    Route::resource('products', ProductController::class);
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-
-    Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('products.edit');
-    Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
-
-    Route::delete('/products/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::resource('categories', CategoryController::class);
 
     Route::resource('posts', PostController::class);
