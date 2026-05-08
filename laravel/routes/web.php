@@ -127,66 +127,24 @@ Route::middleware(['auth'])->group(function () {
         |--------------------------------------------------------------------------
         */
 
-        Route::get('/dashboard', [CrudUserController::class, 'dashboard'])
-            ->name('dashboard');
+        // Bảng điều khiển thống kê
+        Route::get('/dashboard', [CrudUserController::class, 'dashboard'])->name('dashboard');
 
-        /*
-        |--------------------------------------------------------------------------
-        | USERS
-        |--------------------------------------------------------------------------
-        */
+        // Quản lý User
+        Route::get('/list', [CrudUserController::class, 'listUser'])->name('user.listUser');
+        Route::get('/read/{id}', [CrudUserController::class, 'readUser'])->name('user.readUser');
+        Route::get('/update/{id}', [CrudUserController::class, 'updateUser'])->name('user.updateUser');
+        Route::post('/update/{id}', [CrudUserController::class, 'postUpdateUser'])->name('user.postUpdateUser');
+        Route::get('/delete/{id}', [CrudUserController::class, 'deleteUser'])->name('user.deleteUser');
 
-        Route::get('/users', [CrudUserController::class, 'listUser'])
-            ->name('user.listUser');
-
-        Route::get('/users/{id}', [CrudUserController::class, 'readUser'])
-            ->name('user.readUser');
-
-        Route::get('/users/{id}/edit', [CrudUserController::class, 'updateUser'])
-            ->name('user.updateUser');
-
-        Route::put('/users/{id}', [CrudUserController::class, 'postUpdateUser'])
-            ->name('user.postUpdateUser');
-
-        Route::delete('/users/{id}', [CrudUserController::class, 'deleteUser'])
-            ->name('user.deleteUser');
-
-        /*
-        |--------------------------------------------------------------------------
-        | CATEGORY
-        |--------------------------------------------------------------------------
-        */
-
-        Route::resource('categories', CategoryController::class);
-
-        Route::get('/do-uong', [CategoryController::class, 'doUong'])
-            ->name('categories.do_uong');
-
-        Route::get('/thuc-pham', [CategoryController::class, 'thucPham'])
-            ->name('categories.thuc_pham');
-
-        Route::get('/gia-dung', [CategoryController::class, 'giaDung'])
-            ->name('categories.gia_dung');
-
-        /*
-        |--------------------------------------------------------------------------
-        | QUẢN LÝ KHUYẾN MÃI
-        |--------------------------------------------------------------------------
-        */
-
-        Route::get('/khuyen-mai/them-moi', [PostController::class, 'create'])
-            ->name('posts.create');
-
-        Route::post('/khuyen-mai/luu', [PostController::class, 'store'])
-            ->name('posts.store');
-
-        Route::get('/khuyen-mai/{id}/sua', [PostController::class, 'edit'])
-            ->name('posts.edit');
-
-        Route::put('/khuyen-mai/{id}', [PostController::class, 'update'])
-            ->name('posts.update');
-
-        Route::delete('/khuyen-mai/{id}', [PostController::class, 'destroy'])
-            ->name('posts.destroy');
+        // =========================
+        // Quản lý Products
+        // =========================
+        Route::resource('products', ProductController::class);
     });
+
+    /* --- KHU VỰC DÀNH CHO CẢ USER THƯỜNG VÀ ADMIN --- */
+    // Khách hàng (role=0) có thể vào xem sản phẩm, bài viết thoải mái
+    Route::resource('categories', CategoryController::class);
+    Route::resource('posts', PostController::class);
 });
