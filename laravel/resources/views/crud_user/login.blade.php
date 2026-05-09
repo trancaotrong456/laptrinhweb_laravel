@@ -2,118 +2,104 @@
 @section('title', 'Đăng nhập - Siêu thị Mini')
 
 @section('content')
-<main class="signup-form py-5" style="min-height: 80vh; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6 col-xl-5">
-                <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
-                    <div class="card-header bg-primary text-white py-4 text-center">
-                        <h3 class="mb-0 fw-bold">Chào mừng quay lại!</h3>
-                        <p class="mb-0 opacity-90 mt-1">Đăng nhập để tiếp tục mua sắm</p>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+
+            <div class="card border-0 shadow-xl rounded-5 overflow-hidden">
+
+                {{-- HEADER --}}
+                <div class="card-header bg-gradient-primary text-white text-center py-4">
+                    <i class="fas fa-user-lock fa-3x mb-3 opacity-90"></i>
+                    <h1 class="h3 fw-bold mb-1">Đăng nhập</h1>
+                    <p class="mb-0 opacity-90">Đăng nhập để tiếp tục mua sắm</p>
+                </div>
+
+                {{-- BODY --}}
+                <div class="card-body p-5">
+
+                    {{-- ERROR --}}
+                    @if ($errors->any())
+                    <div class="alert alert-danger rounded-4 shadow-sm mb-4">
+                        <ul class="mb-0 small">
+                            @foreach ($errors->all() as $error)
+                            <li><i class="fas fa-exclamation-circle me-2"></i>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
-                    <div class="card-body p-5">
-                        <form action="{{ route('user.authUser') }}" method="POST">
-                            @csrf
+                    @endif
 
-                            @if ($errors->any())
-                            <div class="alert alert-danger rounded-3">
-                                {{ $errors->first() }}
+                    {{-- FORM --}}
+                    <form action="{{ route('user.authUser') }}" method="POST" class="row g-4">
+                        @csrf
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" name="email" value="{{ old('email') }}" required
+                                class="form-control form-control-lg">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Mật khẩu</label>
+                            <input type="password" name="password" required class="form-control form-control-lg">
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                                <label class="form-check-label" for="remember">
+                                    Ghi nhớ đăng nhập
+                                </label>
                             </div>
-                            @endif
+                        </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold mb-2">📧 Email đăng nhập</label>
-                                <input type="email"
-                                    class="form-control form-control-lg @error('email') is-invalid @enderror" id="email"
-                                    name="email" value="{{ old('email') }}" required autofocus
-                                    placeholder="nhap@gmail.com">
-                                @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                        <div class="col-12">
+                            <button type="submit"
+                                class="btn btn-primary btn-lg w-100 rounded-pill shadow-lg py-3 fw-bold">
+                                <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập
+                            </button>
+                        </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-semibold mb-2">🔒 Mật khẩu</label>
-                                <input type="password"
-                                    class="form-control form-control-lg @error('password') is-invalid @enderror"
-                                    name="password" required placeholder="Nhập mật khẩu">
-                                @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                                    <label class="form-check-label small fw-normal" for="remember">
-                                        Ghi nhớ đăng nhập
-                                    </label>
-                                </div>
-                                <a href="#" class="small text-decoration-none fw-semibold text-primary">Quên mật
-                                    khẩu?</a>
-                            </div>
-
-                            <div class="d-grid mb-4">
-                                <button type="submit"
-                                    class="btn btn-primary btn-lg fw-bold py-3 rounded-pill shadow-lg">
-                                    <i class="fas fa-sign-in-alt me-2"></i>Đăng nhập ngay
-                                </button>
-                            </div>
-
-                            <div class="text-center border-top pt-3">
-                                <small class="text-muted me-2">Chưa có tài khoản?</small>
-                                <a href="{{ route('user.createUser') }}"
-                                    class="fw-bold text-primary text-decoration-none">
-                                    Đăng ký miễn phí!
+                        <div class="col-12 text-center">
+                            <small class="text-muted">
+                                Chưa có tài khoản?
+                                <a href="{{ route('user.createUser') }}" class="text-decoration-none fw-semibold">
+                                    Đăng ký
                                 </a>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="bg-light py-4 text-center">
-                        <small class="text-muted">Bảo mật thông tin người dùng • Hỗ trợ 24/7</small>
-                    </div>
+                            </small>
+                        </div>
+                    </form>
+
                 </div>
             </div>
+
         </div>
     </div>
-</main>
+</div>
 
 <style>
-.signup-form .card {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .btn-primary {
-    background: linear-gradient(45deg, #007bff, #0056b3);
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     border: none;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 123, 255, 0.4);
+}
+
+.form-control:focus {
+    border-color: #4facfe;
+    box-shadow: 0 0 0 .25rem rgba(79, 172, 254, .15);
+}
+
+.shadow-xl {
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, .1),
+        0 10px 10px -5px rgba(0, 0, 0, .04);
 }
 </style>
-@extends('dashboard')
-
-@section('content')
-<form action="{{ route('user.authUser') }}" method="POST">
-    @csrf
-    <h1>Màn hình đăng nhập</h1>
-    
-    <label for="email">Email đăng nhập:</label>
-    <input type="email" id="email" name="email" required><br><br>
-    @if ($errors->has('email'))
-        <span style="color: red; display: block; margin-top: -15px; margin-bottom: 10px;">{{ $errors->first('email') }}</span>
-    @endif
-
-    <label for="password">Mật khẩu:</label>
-    <input type="password" id="password" name="password" required><br><br>
-    @if ($errors->has('password'))
-        <span style="color: red; display: block; margin-top: -15px; margin-bottom: 10px;">{{ $errors->first('password') }}</span>
-    @endif
-
-    <input type="checkbox" id="remember" name="remember">Ghi nhớ đăng nhập<br><br>
-    
-    <input type="submit" value="Đăng nhập">
-</form>
 @endsection
