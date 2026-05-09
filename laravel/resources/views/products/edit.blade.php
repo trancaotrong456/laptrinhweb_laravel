@@ -1,58 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Sửa sản phẩm</title>
-    <link rel="stylesheet" href="{{ asset('css/products.css') }}">
-</head>
-
-<body>
-
-<div class="form-container">
-
-    <h2>Sửa sản phẩm</h2>
-
-    <form method="POST" enctype="multipart/form-data"
-          action="{{ route('products.update', $product->id) }}">
-        @csrf
-        @method('PUT')
-
-        <div class="form-group">
-            <label>Tên sản phẩm</label>
-            <input type="text" name="name" value="{{ $product->name }}">
-        </div>
-
-        <div class="form-group">
-            <label>Giá</label>
-            <input type="text" name="price" value="{{ $product->price }}">
-        </div>
-
-        <div class="form-group">
-            <label>Số lượng</label>
-            <input type="text" name="quantity" value="{{ $product->quantity }}">
-        </div>
-
-        <div class="form-group">
-            <label>Ảnh mới</label>
-            <input type="file" name="image">
-        </div>
-
-        @if($product->image)
-            <div class="form-group">
-                <label>Ảnh hiện tại</label><br>
-                <img class="preview-img"
-                     src="{{ asset('images/'.$product->image) }}"
-                     width="100">
-            </div>
-        @endif
-
-        <button class="btn-submit">Cập nhật</button>
-    </form>
-
-</div>
-
-</body>
-</html>
 @extends('layouts.app')
 
 @section('content')
@@ -65,58 +10,64 @@
             <form action="{{ route('products.update', $product->id) }}" method="POST">
                 @csrf
                 @method('PUT')
-                
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-                        <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" 
-                               value="{{ old('name', $product->name) }}" required>
+                        <input type="text" name="name" id="name"
+                            class="form-control @error('name') is-invalid @enderror"
+                            value="{{ old('name', $product->name) }}" required>
                         @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="category_id" class="form-label">Danh mục <span class="text-danger">*</span></label>
-                        <select name="category_id" id="category_id" class="form-control @error('category_id') is-invalid @enderror" required>
+                        <select name="category_id" id="category_id"
+                            class="form-control @error('category_id') is-invalid @enderror" required>
                             @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ $product->category_id == $category->id ? 'selected' : '' }}>
-                                    @if($category->type == 'do_uong') 🥤 
-                                    @elseif($category->type == 'thuc_pham') 🍚 
-                                    @else 🏠 @endif
-                                    {{ $category->name }}
-                                </option>
+                            <option value="{{ $category->id }}"
+                                {{ $product->category_id == $category->id ? 'selected' : '' }}>
+                                @if($category->type == 'do_uong') 🥤
+                                @elseif($category->type == 'thuc_pham') 🍚
+                                @else 🏠 @endif
+                                {{ $category->name }}
+                            </option>
                             @endforeach
                         </select>
                         @error('category_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="price" class="form-label">Giá (VNĐ) <span class="text-danger">*</span></label>
-                        <input type="number" name="price" id="price" class="form-control @error('price') is-invalid @enderror" 
-                               value="{{ old('price', $product->price) }}" required>
+                        <input type="number" name="price" id="price"
+                            class="form-control @error('price') is-invalid @enderror"
+                            value="{{ old('price', $product->price) }}" required>
                         @error('price')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="quantity" class="form-label">Số lượng <span class="text-danger">*</span></label>
-                        <input type="number" name="quantity" id="quantity" class="form-control @error('quantity') is-invalid @enderror" 
-                               value="{{ old('quantity', $product->quantity) }}" required>
+                        <input type="number" name="quantity" id="quantity"
+                            class="form-control @error('quantity') is-invalid @enderror"
+                            value="{{ old('quantity', $product->quantity) }}" required>
                         @error('quantity')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="col-md-12 mb-3">
                         <label for="description" class="form-label">Mô tả</label>
-                        <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror" 
-                                  rows="4">{{ old('description', $product->description) }}</textarea>
+                        <textarea name="description" id="description"
+                            class="form-control @error('description') is-invalid @enderror"
+                            rows="4">{{ old('description', $product->description) }}</textarea>
                         @error('description')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
