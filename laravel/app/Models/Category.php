@@ -2,19 +2,29 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'type', 'slug', 'description'];
+    use HasFactory;
 
-    public function scopeDoUong($query)
+    protected $fillable = [
+        'name',
+        'type',          // Thêm dòng này
+        'slug',
+        'description'
+    ];
+
+    // Quan hệ với sản phẩm (1 category có nhiều products)
+    public function products()
     {
-        return $query->where('type', 'do_uong');
+        return $this->hasMany(Product::class, 'category_id');
     }
 
-    public function scopeThucPham($query)
+    // Accessor để lấy số lượng sản phẩm trong danh mục
+    public function getProductsCountAttribute()
     {
-        return $query->where('type', 'thuc_pham');
+        return $this->products()->count();
     }
 }

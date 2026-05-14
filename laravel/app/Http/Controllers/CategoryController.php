@@ -3,103 +3,125 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class CategoryController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
     {
-        $categories = Category::latest()->paginate(10);
+        $search = $request->input('search');
 
-        return view('categories.index', compact('categories'));
+        $query = Category::withCount('products');
+
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+        }
+
+        $categories = $query->latest()->paginate(10)->appends($request->query());
+
+        return view('categories.index', compact('categories', 'search'));
     }
 
-    public function doUong()
-    {
-        $doUongs = Category::where('type', 'do_uong')->latest()->get();
-
-        return view('categories.douong', compact('doUongs'));
-    }
-
-    public function thucPham()
-    {
-        $thucPhams = Category::where('type', 'thuc_pham')->latest()->get();
-
-        return view('categories.thucpham', compact('thucPhams'));
-    }
-
-    public function giaDung()
-    {
-        $giaDungs = Category::where('type', 'gia_dung')->latest()->get();
-
-        return view('categories.giadung', compact('giaDungs'));
-    }
-
+    /**
+     * Show the form for creating a new resource.
+     */
     public function create()
     {
         return view('categories.create');
     }
 
+    /**
+     * Store a newly created resource in storage.
+     */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|max:255|unique:categories,name',
-            'type' => 'required|in:do_uong,thuc_pham,gia_dung',
-            'description' => 'nullable'
+            'name' => 'required|string|max:255|unique:categories,name',
+            'description' => 'nullable|string|max:1000'
         ]);
 
-        Category::create([
-            'name' => $request->name,
-            'type' => $request->type,
-            'slug' => Str::slug($request->name),
-            'description' => $request->description
-        ]);
+        try {
+            Category::create([
+                'name' => $request->name,
+                'description' => $request->description
+            ]);
 
-        return redirect()->route('categories.index')
-            ->with('success', 'Thêm danh mục thành công!');
+            return redirect()->route('categories.index')
+                           ->with('success', 'Thêm danh mục "' . $request->name . '" thành công!');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                        ->withErrors(['error' => 'Có lỗi xảy ra khi thêm danh mục. Vui lòng thử lại.']);
+        }
     }
 
-    public function show($id)
+    /**
+     * Display the specified resource.
+     */
+    public function show(Category $category)
     {
-        $category = Category::findOrFail($id);
-
-        return view('categories.show', compact('category'));
+        $products = $category->products()->paginate(10);
+        return view('categories.show', compact('category', 'products'));
     }
 
-    public function edit($id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Category $category)
     {
-        $category = Category::findOrFail($id);
-
         return view('categories.edit', compact('category'));
     }
 
-    public function update(Request $request, $id)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, Category $category)
     {
-        $category = Category::findOrFail($id);
-
         $request->validate([
-            'name' => 'required|max:255|unique:categories,name,' . $id,
-            'description' => 'nullable'
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'description' => 'nullable|string|max:1000'
         ]);
 
-        $category->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'description' => $request->description
-        ]);
+        try {
+            $category->update([
+                'name' => $request->name,
+                'description' => $request->description
+            ]);
 
-        return redirect()->route('categories.index')
-            ->with('success', 'Cập nhật danh mục thành công!');
+            return redirect()->route('categories.index')
+                           ->with('success', 'Cập nhật danh mục "' . $request->name . '" thành công!');
+        } catch (\Exception $e) {
+            return back()->withInput()
+                        ->withErrors(['error' => 'Có lỗi xảy ra khi cập nhật danh mục. Vui lòng thử lại.']);
+        }
     }
 
-    public function destroy($id)
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Category $category)
     {
-        $category = Category::findOrFail($id);
+        try {
+            // Kiểm tra xem danh mục có sản phẩm không
+            if ($category->products()->count() > 0) {
+                return back()->withErrors([
+                    'error' => 'Không thể xóa danh mục "' . $category->name . '" vì còn ' .
+                              $category->products()->count() . ' sản phẩm. Vui lòng chuyển sản phẩm sang danh mục khác trước.'
+                ]);
+            }
 
-        $category->delete();
+            $categoryName = $category->name;
+            $category->delete();
 
-        return redirect()->route('categories.index')
-            ->with('success', 'Xóa danh mục thành công!');
+            return redirect()->route('categories.index')
+                           ->with('success', 'Xóa danh mục "' . $categoryName . '" thành công!');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Có lỗi xảy ra khi xóa danh mục. Vui lòng thử lại.']);
+        }
     }
 }

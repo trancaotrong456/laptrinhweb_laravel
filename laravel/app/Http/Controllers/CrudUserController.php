@@ -21,31 +21,18 @@ class CrudUserController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
-        
-        if ($user) {
-            // Tương thích dữ liệu cũ (plain text) + xác thực hash chuẩn
-            // Lưu ý: Hash::check sẽ throw nếu $user->password không phải bcrypt.
-            $passwordInDb = (string) $user->password;
-            $plainPasswordMatch = ($passwordInDb === $request->password);
 
-            try {
-                $hashPasswordMatch = Hash::check($request->password, $passwordInDb);
-            } catch (\Throwable $e) {
-                $hashPasswordMatch = false;
+        if ($user && (Hash::check($request->password, $user->password) || $user->password === $request->password)) {
+            // Nếu mật khẩu cũ lưu dạng plain text thì cập nhật lại bằng hash chuẩn
+            if (!Hash::check($request->password, $user->password)) {
+                $user->password = Hash::make($request->password);
+                $user->save();
             }
 
-            if ($hashPasswordMatch || $plainPasswordMatch) {
-                // Nếu mật khẩu đang là plain text thì hash lại để đăng nhập lần sau không lỗi
-                if ($plainPasswordMatch) {
-                    $user->password = Hash::make($request->password);
-                    $user->save();
-                }
-
-                Auth::login($user, $request->boolean('remember'));
-                $request->session()->regenerate();
-
-                return redirect()->intended(route('dashboard'));
-            }
+            Auth::login($user, $request->boolean('remember'));
+            $request->session()->regenerate();
+            
+            return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
@@ -67,7 +54,7 @@ class CrudUserController extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => $request->password,
+            'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'address' => $request->address,
         ]);
