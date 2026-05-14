@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>User Management - @yield('title')</title>
+    
     <style>
     body {
         font-family: Arial, sans-serif;

@@ -41,7 +41,7 @@
             <div class="form-group">
                 <label>Ảnh hiện tại</label><br>
                 <img class="preview-img"
-                     src="{{ asset('images/'.$product->image) }}"
+                     src="{{ asset('storage/'.$product->image) }}"
                      width="100">
             </div>
         @endif

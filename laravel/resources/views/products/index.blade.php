@@ -14,6 +14,31 @@
     <div class="top-bar">
         <form method="GET" action="{{ route('products.index') }}" class="search">
             <input type="text" name="keyword" placeholder="Nhập tên sản phẩm..." value="{{ $keyword ?? '' }}">
+            <select name="category">
+                <option value="">-- Danh mục --</option>
+                @foreach ($categories as $c)
+                    <option value="{{ $c->name }}">{{ $c->name }}</option>
+                @endforeach
+            </select>
+            <select name="sort">
+
+                <option value="">
+                    -- Sắp xếp --
+                </option>
+            
+                <option value="price_asc">
+                    Giá tăng dần
+                </option>
+            
+                <option value="price_desc">
+                    Giá giảm dần
+                </option>
+            
+                <option value="latest">
+                    Mới nhất
+                </option>
+            
+            </select>
             <button type="submit">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
@@ -36,6 +61,7 @@
             <th>Giá</th>
             <th>Số lượng</th>
             <th>Ảnh</th>
+            <th>Trạng thái</th>
             <th>Action</th>
         </tr>
 
@@ -46,7 +72,14 @@
             <td>{{ $p->quantity }}</td>
             <td>
                 @if($p->image)
-                    <img src="{{ asset('images/'.$p->image) }}" width="70">
+                    <img src="{{ asset('storage/'.$p->image) }}" width="70">
+                @endif
+            </td>
+            <td>
+                @if($p->status == 'Còn hàng')
+                <span class="status-instock">Còn hàng</span>
+                @else
+                <span class="status-outstock">Hết hàng</span>
                 @endif
             </td>
             <td class="actions">
@@ -59,6 +92,7 @@
                         Xóa
                     </button>
                 </form>
+                <a class="btn-detail" href="{{ route('products.show', $p->id) }}">Chi tiết</a>
             </td>
         </tr>
         @endforeach

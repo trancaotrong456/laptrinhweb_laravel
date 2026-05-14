@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -17,6 +18,9 @@ class ProductController extends Controller
 
         // lọc theo category
         $products = $this->filterByCategory($products, $request);
+
+        //sap xep
+        $products = $this->sortProducts($products, $request);
 
         // phân trang
         $products = $this->paginateProducts($products);
@@ -50,16 +54,14 @@ class ProductController extends Controller
 
         return $products;
     }
-
     // Lọc theo category
     private function filterByCategory($products, $request)
     {
         if ($request->category) {
 
-            $products->where(
-                'category_id',
-                $request->category
-            );
+            $products->whereHas('category', function($query) use ($request){
+                $query->where('name', $request->category);
+            });
         }
 
         return $products;
@@ -68,7 +70,7 @@ class ProductController extends Controller
     // Phân trang sản phẩm
     private function paginateProducts($products)
     {
-        return $products->paginate(5);
+        return $products->paginate(5)->appends(request()->query());
     }
     //show form them san pham
     public function create()
@@ -89,8 +91,7 @@ class ProductController extends Controller
         $imageName = null;
 
         if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
+            $imageName = $request->file('image')->store('products', 'public');
         }
 
         Product::create([
@@ -98,7 +99,8 @@ class ProductController extends Controller
             'price' => $request->price,
             'quantity' => $request->quantity,
             'image' => $imageName,
-            'category_id' => $request->category_id
+            'category_id' => $request->category_id,
+            'status' => $request->quantity > 0 ? 'Còn hàng' : 'Hết hàng'
         ]);
 
         return redirect()
@@ -115,19 +117,22 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
-
         $imageName = $product->image;
 
         if ($request->hasFile('image')) {
-            $imageName = time() . '.' . $request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
+            //xoa anh cu
+            if($product->image){
+                Storage::disk('public')->delete($product->image);
+            }
+            $imageName = $request->file('image')->store('products', 'public');
         }
 
         $product->update([
             'name' => $request->name,
             'price' => $request->price,
             'quantity' => $request->quantity,
-            'image' => $imageName
+            'image' => $imageName,
+            'status' => $request->quantity > 0 ? 'Còn hàng' : 'Hết hàng'
         ]);
 
         return redirect()
@@ -137,9 +142,35 @@ class ProductController extends Controller
     // xoa san pham
     public function destroy($id)
     {
-        Product::destroy($id);
+        $product = Product::findOrFail($id);
+
+        //xoa anh
+        if($product->image){
+            Storage::disk('public')->delete($product->image);
+        }
+        $product->delete();
         return redirect()
             ->route('products.index')
             ->with('success', 'Xóa sản phẩm thành công');
+    }
+
+    //chi tiet san pham
+    public function show($id){
+        $product = Product::findOrFail($id);
+
+        return view('products.show', compact('product'));
+    }
+    //sap xep san pham
+    public function sortProducts($products, $request){
+        if($request->sort == 'price_asc'){
+            $products->orderBy('price', 'asc');
+        }
+        elseif ($request->sort == 'price_desc'){
+            $products->orderBy('price', 'desc');
+        }
+        elseif ($request->sort == 'latest'){
+            $products->latest();
+        }
+        return $products;
     }
 }

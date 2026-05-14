@@ -54,7 +54,7 @@ Route::middleware(['auth'])->group(function () {
         // =========================
         Route::resource('products', ProductController::class);
     });
-
+    Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
     /* --- KHU VỰC DÀNH CHO CẢ USER THƯỜNG VÀ ADMIN --- */
     // Khách hàng (role=0) có thể vào xem sản phẩm, bài viết thoải mái
     Route::resource('categories', CategoryController::class);
