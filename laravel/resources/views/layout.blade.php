@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html>
 
@@ -83,3 +84,6 @@
 </body>
 
 </html>
+=======
+@extends('_layout_fixed')
+>>>>>>> master
