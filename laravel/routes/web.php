@@ -70,19 +70,25 @@ Route::middleware(['auth'])->group(function () {
     */
 
     Route::get('/cart', [CartController::class, 'index'])
-        ->name('cart.index');
+    ->name('cart.index');
 
-    Route::post('/cart/add', [CartController::class, 'add'])
-        ->name('cart.add');
+Route::post('/cart/add', [CartController::class, 'add'])
+    ->name('cart.add');
 
-    Route::post('/cart/update', [CartController::class, 'update'])
-        ->name('cart.update');
+Route::post('/cart/update', [CartController::class, 'update'])
+    ->name('cart.update');
 
-    Route::delete('/cart/{productId}', [CartController::class, 'remove'])
-        ->name('cart.remove');
+Route::delete('/cart/{productId}', [CartController::class, 'remove'])
+    ->name('cart.remove');
 
-    Route::get('/cart/clear', [CartController::class, 'clear'])
-        ->name('cart.clear');
+Route::get('/cart/undo-remove', [CartController::class, 'undoRemove'])
+    ->name('cart.undoRemove');
+
+Route::post('/cart/confirm-selected', [CartController::class, 'confirmSelected'])
+    ->name('cart.confirmSelected');
+
+Route::get('/cart/clear', [CartController::class, 'clear'])
+    ->name('cart.clear');
 
     /*
     |--------------------------------------------------------------------------
@@ -127,24 +133,46 @@ Route::middleware(['auth'])->group(function () {
         |--------------------------------------------------------------------------
         */
 
-        // Bảng điều khiển thống kê
-        Route::get('/dashboard', [CrudUserController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard', [CrudUserController::class, 'dashboard'])
+            ->name('dashboard');
 
-        // Quản lý User
-        Route::get('/list', [CrudUserController::class, 'listUser'])->name('user.listUser');
-        Route::get('/read/{id}', [CrudUserController::class, 'readUser'])->name('user.readUser');
-        Route::get('/update/{id}', [CrudUserController::class, 'updateUser'])->name('user.updateUser');
-        Route::post('/update/{id}', [CrudUserController::class, 'postUpdateUser'])->name('user.postUpdateUser');
-        Route::get('/delete/{id}', [CrudUserController::class, 'deleteUser'])->name('user.deleteUser');
+        /*
+        |--------------------------------------------------------------------------
+        | USER MANAGEMENT
+        |--------------------------------------------------------------------------
+        */
 
-        // =========================
-        // Quản lý Products
-        // =========================
+        Route::get('/list', [CrudUserController::class, 'listUser'])
+            ->name('user.listUser');
+
+        Route::get('/read/{id}', [CrudUserController::class, 'readUser'])
+            ->name('user.readUser');
+
+        Route::get('/update/{id}', [CrudUserController::class, 'updateUser'])
+            ->name('user.updateUser');
+
+        Route::post('/update/{id}', [CrudUserController::class, 'postUpdateUser'])
+            ->name('user.postUpdateUser');
+
+        Route::get('/delete/{id}', [CrudUserController::class, 'deleteUser'])
+            ->name('user.deleteUser');
+
+        /*
+        |--------------------------------------------------------------------------
+        | PRODUCT MANAGEMENT
+        |--------------------------------------------------------------------------
+        */
+
         Route::resource('products', ProductController::class);
     });
 
-    /* --- KHU VỰC DÀNH CHO CẢ USER THƯỜNG VÀ ADMIN --- */
-    // Khách hàng (role=0) có thể vào xem sản phẩm, bài viết thoải mái
+    /*
+    |--------------------------------------------------------------------------
+    | USER + ADMIN
+    |--------------------------------------------------------------------------
+    */
+
     Route::resource('categories', CategoryController::class);
+
     Route::resource('posts', PostController::class);
 });
