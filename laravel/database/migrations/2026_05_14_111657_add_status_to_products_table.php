@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-
-        Schema::table('posts', function (Blueprint $table) {
-            $table->tinyInteger('type')->default(0)->comment('1: Banner, 0: Small');
+        Schema::table('products', function (Blueprint $table) {
+             $table->string('status')->default('Còn hàng');
         });
     }
 
@@ -22,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('products', function (Blueprint $table) {
 
-        Schema::table('posts', function (Blueprint $table) {
             //
         });
     }
