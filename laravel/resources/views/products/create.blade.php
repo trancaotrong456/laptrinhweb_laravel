@@ -1,34 +1,5 @@
 @extends('layouts.app')
 
-<<<<<<< HEAD
-<head>
-    <meta charset="UTF-8">
-    <title>Thêm sản phẩm</title>
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/products.css') }}">
-</head>
-
-<body>
-    <nav>
-        <ul>
-            <li><a href="{{ route('home') }}">Trang chủ</a></li>
-
-            @guest
-            <li><a href="{{ route('login') }}">Đăng nhập</a></li>
-            <li><a href="{{ route('user.createUser') }}">Đăng kí</a></li>
-            @else
-            <li><a href="{{ route('products.index') }}">Sản phẩm</a></li>
-            <li><a href="{{ route('signout') }}">Đăng xuất</a></li>
-            @if(Auth::user()->role == 1)
-            <li><a href="{{ route('user.listUser') }}">Quản lý User</a></li>
-            <li><a href="{{ route('categories.index') }}">Danh mục</a></li>
-            <li><a href="{{ route('posts.index') }}">Tin tức</a></li>
-            @endif
-            @endguest
-        </ul>
-    </nav>
-=======
-
 @section('content')
 <div class="container">
     <div class="card">
@@ -38,8 +9,6 @@
         <div class="card-body">
             <form action="{{ route('products.store') }}" method="POST">
                 @csrf
->>>>>>> master
-
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
@@ -113,15 +82,6 @@
             </form>
         </div>
     </div>
-<<<<<<< HEAD
-    <footer style="background-color: #0000FF; color: white; padding: 10px; position: fixed; bottom: 0; width: 100%;">
-        <p style="text-align: center; margin: 0;">&copy; Trần Cao Trọng - 24211TT1101</p>
-    </footer>
-
-</body>
-
-</html>
-=======
 </div>
 @endsection
->>>>>>> master
+
