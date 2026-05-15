@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="container-product">
     <h2>Danh sách sản phẩm</h2>
     <div class="top-bar">
         <form method="GET" action="{{ route('products.index') }}" class="search">
