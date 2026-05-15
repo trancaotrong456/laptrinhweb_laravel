@@ -4,155 +4,156 @@
 
 @section('content')
 
-<!-- CART HERO -->
 <section class="py-5 bg-light">
     <div class="container d-flex justify-content-between align-items-center">
-        <h2>
+        <h2 class="fw-bold">
             <i class="fas fa-shopping-cart text-primary me-2"></i>
-            Giỏ hàng
+            Giỏ hàng của bạn
         </h2>
-
         <a href="{{ route('home') }}" class="btn btn-outline-primary">
-            Tiếp tục mua
+            <i class="fas fa-arrow-left me-1"></i> Tiếp tục mua sắm
         </a>
     </div>
 </section>
 
-@if(empty($cart) || count($cart) == 0)
+<div class="container py-5">
+    @if(empty($cart) || count($cart) == 0)
+    <div class="text-center py-5">
+        <img src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png" width="150" class="mb-4" alt="Empty Cart">
+        <h3 class="text-muted">Giỏ hàng của bạn đang trống</h3>
+        <p class="text-secondary">Hãy thêm một vài sản phẩm để bắt đầu mua sắm nhé!</p>
+        <a href="{{ route('products.index') }}" class="btn btn-primary btn-lg mt-3">
+            Mua sắm ngay
+        </a>
+    </div>
+    @else
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0">
+                    <table class="table align-middle mb-0">
+                        <thead class="bg-dark text-white">
+                            <tr>
+                                <th class="ps-4">Sản phẩm</th>
+                                <th class="text-center">Giá</th>
+                                <th class="text-center">Số lượng</th>
+                                <th class="text-end pe-4">Thành tiền</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($cart as $id => $item)
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <input type="checkbox" class="form-check-input cart-select"
+                                            name="selected_products[]" value="{{ $id }}" form="cartCheckoutForm">
 
-<!-- EMPTY CART -->
-<div class="container text-center py-5">
+                                        @if(!empty($item['image']))
+                                        <img src="{{ asset('images/' . $item['image']) }}" class="rounded shadow-sm"
+                                            width="70" height="70" style="object-fit:cover;">
+                                        @else
+                                        <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center"
+                                            style="width:70px; height:70px;">N/A</div>
+                                        @endif
 
-    <h3 class="text-muted">
-        Giỏ hàng trống
-    </h3>
-
-    <a href="{{ route('products.index') }}" class="btn btn-primary mt-3">
-        Mua ngay
-    </a>
-
-</div>
-
-@else
-
-<!-- CART -->
-<div class="container py-4">
-
-    <table class="table align-middle">
-
-        <thead>
-            <tr>
-                <th>Sản phẩm</th>
-                <th class="text-center">Giá</th>
-                <th class="text-center">Số lượng</th>
-                <th class="text-end">Thành tiền</th>
-                <th></th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            @foreach($cart as $id => $item)
-
-            <tr>
-
-
-                <!-- PRODUCT -->
-                <td>
-                    <div class="d-flex align-items-center gap-3">
-
-                        @if(!empty($item['image']))
-                        <img src="{{ asset('images/' . $item['image']) }}" width="70" height="70"
-                            style="object-fit:cover; border-radius:10px;">
-                        @endif
-
-                        <div>
-                            <strong>{{ $item['name'] }}</strong>
-                        </div>
-
-                    </div>
-                </td>
-
-                <!-- PRICE -->
-                <td class="text-center">
-                    ₫{{ number_format($item['price'] ?? 0) }}
-                </td>
-
-                <!-- QUANTITY -->
-                <td class="text-center">
-
-                    <form method="POST" action="{{ route('cart.update') }}" class="d-flex justify-content-center gap-2">
-
-                        @csrf
-
-                        <input type="hidden" name="product_id" value="{{ $id }}">
-
-                        <input type="number" name="quantity" value="{{ $item['quantity'] ?? 1 }}" min="1"
-                            class="form-control" style="width:80px;">
-
-                        <button class="btn btn-sm btn-primary">
-                            OK
-                        </button>
-
-                    </form>
-
-                </td>
-
-                <!-- SUBTOTAL -->
-                <td class="text-end">
-                    ₫{{ number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 1)) }}
-                </td>
-
-                <!-- REMOVE -->
-                <td class="text-end">
-
-                    <form method="POST" action="{{ route('cart.remove', $id) }}">
-
-                        @csrf
-                        @method('DELETE')
-
-                        <button class="btn btn-danger btn-sm">
-                            Xóa
-                        </button>
-
-                    </form>
-
-                </td>
-
-            </tr>
-
-            @endforeach
-
-        </tbody>
-
-    </table>
-
-    <!-- TOTAL -->
-    <div class="text-end mt-4">
-
-        <h4>
-            Tổng:
-            <span class="text-success">
-                ₫{{ number_format($total) }}
-            </span>
-        </h4>
-
-        <div class="mt-3 d-flex justify-content-end gap-2">
-
-            <a href="{{ route('cart.clear') }}" class="btn btn-outline-danger">
-                Xóa giỏ hàng
-            </a>
-
-            <a href="{{ route('checkout.index') }}" class="btn btn-success">
-                Thanh toán
-            </a>
-
+                                        <div class="fw-bold text-dark">{{ $item['name'] }}</div>
+                                    </div>
+                                </td>
+                                <td class="text-center text-primary fw-bold">
+                                    {{ number_format($item['price']) }}₫
+                                </td>
+                                <td class="text-center">
+                                    <form method="POST" action="{{ route('cart.update') }}"
+                                        class="d-flex justify-content-center gap-1">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $id }}">
+                                        <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1"
+                                            class="form-control text-center" style="width:70px;">
+                                        <button class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="text-end fw-bold">
+                                    {{ number_format($item['price'] * $item['quantity']) }}₫
+                                </td>
+                                <td class="text-center pe-4">
+                                    <form method="POST" action="{{ route('cart.remove', $id) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-link text-danger p-0" title="Xóa">
+                                            <i class="fas fa-trash-alt fa-lg"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
-    </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-4">Tổng quan đơn hàng</h5>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Tạm tính:</span>
+                        <span>{{ number_format($total) }}₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Phí vận chuyển:</span>
+                        <span class="text-success">Miễn phí</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="h5 fw-bold">Tổng cộng:</span>
+                        <span class="h5 fw-bold text-danger">{{ number_format($total) }}₫</span>
+                    </div>
 
+                    <form id="cartCheckoutForm" method="POST" action="{{ route('cart.confirmSelected') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-success btn-lg w-100 mb-2 py-3 shadow">
+                            <i class="fas fa-check-circle me-2"></i> Thanh toán ngay
+                        </button>
+                    </form>
+
+                    <a href="{{ route('cart.clear') }}" class="btn btn-outline-danger w-100 mt-2"
+                        onclick="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')">
+                        Xóa toàn bộ giỏ hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if(session()->has('cart_last_removed'))
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 5000,
+        timerProgressBar: true,
+        icon: 'success',
+        title: 'Đã xóa sản phẩm.',
+        html: '<button id="btn-undo" class="btn btn-sm btn-dark w-100 mt-2">Hoàn tác ngay</button>',
+        didOpen: () => {
+            document.getElementById('btn-undo').addEventListener('click', () => {
+                window.location.href = "{{ route('cart.undoRemove') }}";
+            });
+        }
+    });
+});
+</script>
 @endif
 
 @endsection
