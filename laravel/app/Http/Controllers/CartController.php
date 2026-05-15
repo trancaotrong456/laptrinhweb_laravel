@@ -111,28 +111,21 @@ class CartController extends Controller
    // ================= KHÔI PHỤC ITEM VỪA XÓA =================
 public function undoRemove()
 {
-    $cart = Session::get('cart', []);
-    $lastRemoved = Session::get('cart_last_removed');
+    $cart = session()->get('cart', []);
+    $lastRemoved = session()->get('cart_last_removed');
 
     if ($lastRemoved) {
         $productId = $lastRemoved['product_id'];
-        
-        // Đưa sản phẩm trở lại giỏ
         $cart[$productId] = $lastRemoved['item'];
 
-        Session::put('cart', $cart);
-        
-        // Quan trọng: Xóa dữ liệu tạm để tránh undo nhiều lần một món
-        Session::forget('cart_last_removed');
+        session()->put('cart', $cart);
+        session()->forget('cart_last_removed'); // Xóa sau khi hoàn tác thành công
 
-        return redirect()->route('cart.index')
-            ->with('success', 'Đã khôi phục sản phẩm thành công!');
+        return redirect()->route('cart.index')->with('success', 'Đã khôi phục sản phẩm!');
     }
 
-    return redirect()->route('cart.index')
-        ->with('error', 'Không có dữ liệu để khôi phục.');
+    return redirect()->route('cart.index')->with('error', 'Không thể hoàn tác.');
 }
-
     // ================= XÓA TOÀN BỘ GIỎ =================
     public function clear()
     {

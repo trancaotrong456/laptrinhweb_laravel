@@ -134,24 +134,22 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 @if(session()->has('cart_last_removed'))
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     Swal.fire({
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
-        timer: 6000,
+        timer: 5000,
         timerProgressBar: true,
         icon: 'success',
-        title: 'Đã xóa sản phẩm',
-        html: '<button id="undo-btn" class="btn btn-sm btn-dark mt-2 w-100">Khôi phục (Undo)</button>',
+        title: 'Đã xóa sản phẩm.',
+        html: '<button id="btn-undo" class="btn btn-sm btn-dark w-100 mt-2">Hoàn tác ngay</button>',
         didOpen: () => {
-            const undoBtn = document.getElementById('undo-btn');
-            if (undoBtn) {
-                undoBtn.addEventListener('click', () => {
-                    window.location.href = "{{ route('cart.undoRemove') }}";
-                });
-            }
+            document.getElementById('btn-undo').addEventListener('click', () => {
+                window.location.href = "{{ route('cart.undoRemove') }}";
+            });
         }
     });
 });
