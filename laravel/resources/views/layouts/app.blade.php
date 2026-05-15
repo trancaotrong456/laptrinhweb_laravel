@@ -289,7 +289,7 @@
         @yield('content')
     </main>
 
-    <!-- Footer -->
+    
     <footer class="bg-dark text-white text-center py-5 mt-auto">
         <div class="container">
             <p class="mb-0">© 2024 <strong>Siêu thị Mini</strong> - Trần Cao Trọng - 24211TT1101</p>
