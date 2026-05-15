@@ -10,7 +10,7 @@ use App\Http\Controllers\CheckoutController;
 
 /*
 |--------------------------------------------------------------------------
-| TRANG CHỦ & PUBLIC ROUTES
+| 1. TRANG CHỦ & PUBLIC ROUTES (Không cần đăng nhập)
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
@@ -22,6 +22,9 @@ Route::get('/', function () {
     return view('index', compact('products', 'banners'));
 })->name('home');
 
+// Xem khuyến mãi / Bài viết (Public)
+Route::get('/khuyen-mai', [PostController::class, 'index'])->name('posts.index');
+
 // Đăng nhập / Đăng ký
 Route::get('/login', [CrudUserController::class, 'login'])->name('login');
 Route::post('/login', [CrudUserController::class, 'authUser'])->name('user.authUser');
@@ -30,38 +33,36 @@ Route::post('/register', [CrudUserController::class, 'postUser'])->name('user.po
 
 /*
 |--------------------------------------------------------------------------
-| ROUTE CẦN ĐĂNG NHẬP (AUTH)
+| 2. ROUTE CẦN ĐĂNG NHẬP (AUTH)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
 
+    // Đăng xuất
     Route::get('/signout', [CrudUserController::class, 'signOut'])->name('signout');
 
-    // GIỎ HÀNG
+    // GIỎ HÀNG (Cart)
     Route::prefix('cart')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('cart.index');
         Route::post('/add', [CartController::class, 'add'])->name('cart.add');
         Route::post('/update', [CartController::class, 'update'])->name('cart.update');
         Route::delete('/{productId}', [CartController::class, 'remove'])->name('cart.remove');
-        // Đổi sang GET để dễ gọi từ JavaScript Undo
         Route::get('/undo-remove', [CartController::class, 'undoRemove'])->name('cart.undoRemove');
-        Route::post('/confirm-selected', [CartController::class, 'confirmSelected'])->name('cart.confirmSelected');
         Route::get('/clear', [CartController::class, 'clear'])->name('cart.clear');
     });
 
-    // CHECKOUT
+    // THANH TOÁN (Checkout)
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
-
-    // POSTS / KHUYẾN MÃI (Sửa lỗi trùng posts.index)
-    Route::get('/khuyen-mai', [PostController::class, 'index'])->name('posts.index');
+    Route::get('/order-confirmation', [CartController::class, 'orderConfirmation'])->name('order.confirmation');
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN ONLY
+    | 3. ROUTE DÀNH RIÊNG CHO ADMIN (role = 1)
     |--------------------------------------------------------------------------
     */
     Route::middleware(['admin'])->group(function () {
+        // Bảng điều khiển
         Route::get('/dashboard', [CrudUserController::class, 'dashboard'])->name('dashboard');
         
         // QUẢN LÝ USER
@@ -73,10 +74,16 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/delete/{id}', [CrudUserController::class, 'deleteUser'])->name('user.deleteUser');
         });
 
-        // RESOURCE QUẢN LÝ (Chỉ khai báo 1 lần ở đây)
+        // QUẢN LÝ SẢN PHẨM & DANH MỤC (Resource)
         Route::resource('products', ProductController::class);
         Route::resource('categories', CategoryController::class);
-        // Loại bỏ index để không trùng với route 'khuyen-mai' ở trên
-        Route::resource('posts', PostController::class)->except(['index']);
+
+        // QUẢN LÝ KHUYẾN MÃI (Admin CRUD)
+        // Lưu ý: route index đã khai báo ở phần Public phía trên
+        Route::get('/admin/khuyen-mai/them-moi', [PostController::class, 'create'])->name('posts.create');
+        Route::post('/admin/khuyen-mai/luu', [PostController::class, 'store'])->name('posts.store');
+        Route::get('/admin/khuyen-mai/{id}/sua', [PostController::class, 'edit'])->name('posts.edit');
+        Route::put('/admin/khuyen-mai/{id}', [PostController::class, 'update'])->name('posts.update');
+        Route::delete('/admin/khuyen-mai/{id}', [PostController::class, 'destroy'])->name('posts.destroy');
     });
 });

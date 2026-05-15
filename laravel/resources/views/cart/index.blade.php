@@ -46,9 +46,6 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center gap-3">
-                                        <input type="checkbox" class="form-check-input cart-select"
-                                            name="selected_products[]" value="{{ $id }}" form="cartCheckoutForm">
-
                                         @if(!empty($item['image']))
                                         <img src="{{ asset('images/' . $item['image']) }}" class="rounded shadow-sm"
                                             width="70" height="70" style="object-fit:cover;">
@@ -56,19 +53,17 @@
                                         <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center"
                                             style="width:70px; height:70px;">N/A</div>
                                         @endif
-
                                         <div class="fw-bold text-dark">{{ $item['name'] }}</div>
                                     </div>
                                 </td>
                                 <td class="text-center text-primary fw-bold">
-                                    {{ number_format($item['price']) }}₫
+                                    {{ number_format($item['price'] ?? 0) }}₫
                                 </td>
                                 <td class="text-center">
-                                    <form method="POST" action="{{ route('cart.update') }}"
-                                        class="d-flex justify-content-center gap-1">
+                                    <form method="POST" action="{{ route('cart.update') }}" class="d-flex justify-content-center gap-1">
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $id }}">
-                                        <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1"
+                                        <input type="number" name="quantity" value="{{ $item['quantity'] ?? 1 }}" min="1"
                                             class="form-control text-center" style="width:70px;">
                                         <button class="btn btn-sm btn-outline-success">
                                             <i class="fas fa-sync-alt"></i>
@@ -76,7 +71,7 @@
                                     </form>
                                 </td>
                                 <td class="text-end fw-bold">
-                                    {{ number_format($item['price'] * $item['quantity']) }}₫
+                                    {{ number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 1)) }}₫
                                 </td>
                                 <td class="text-center pe-4">
                                     <form method="POST" action="{{ route('cart.remove', $id) }}">
@@ -113,12 +108,9 @@
                         <span class="h5 fw-bold text-danger">{{ number_format($total) }}₫</span>
                     </div>
 
-                    <form id="cartCheckoutForm" method="POST" action="{{ route('cart.confirmSelected') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-lg w-100 mb-2 py-3 shadow">
-                            <i class="fas fa-check-circle me-2"></i> Thanh toán ngay
-                        </button>
-                    </form>
+                    <button type="button" class="btn btn-success btn-lg w-100 mb-2 py-3 shadow" data-bs-toggle="modal" data-bs-target="#checkoutModal">
+                        <i class="fas fa-credit-card me-2"></i> Thanh toán ngay
+                    </button>
 
                     <a href="{{ route('cart.clear') }}" class="btn btn-outline-danger w-100 mt-2"
                         onclick="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')">
@@ -131,10 +123,55 @@
     @endif
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="checkoutModalLabel">
+                    <i class="fas fa-credit-card me-2"></i>Chọn hình thức thanh toán
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="checkoutForm" method="POST" action="{{ route('checkout') }}">
+                    @csrf
+                    <div class="payment-methods">
+                        <div class="form-check payment-option mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" id="cod" value="cod" checked>
+                            <label class="form-check-label" for="cod">
+                                <i class="fas fa-money-bill-wave me-2"></i><strong>COD (Tiền mặt)</strong>
+                                <p class="text-muted ms-4">Thanh toán khi nhận hàng</p>
+                            </label>
+                        </div>
+                        <div class="form-check payment-option mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" id="bank" value="bank">
+                            <label class="form-check-label" for="bank">
+                                <i class="fas fa-university me-2"></i><strong>Chuyển khoản</strong>
+                                <p class="text-muted ms-4">Nhanh chóng, an toàn</p>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <label for="notes" class="form-label">Ghi chú đơn hàng:</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Ví dụ: Giao giờ hành chính..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" form="checkoutForm" class="btn btn-success btn-lg">Xác nhận đơn hàng</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-@if(session()->has('cart_last_removed'))
+<style>
+.payment-option { padding: 15px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; }
+.payment-option:hover { background-color: #f8f9fa; border-color: #28a745; }
+</style>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@if(session()->has('cart_last_removed'))
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     Swal.fire({

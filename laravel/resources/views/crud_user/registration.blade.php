@@ -1,3 +1,4 @@
+
 @extends('layout')
 @section('title', 'Đăng ký tài khoản - Siêu thị Mini')
 

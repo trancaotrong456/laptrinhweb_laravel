@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <title>User Management - @yield('title')</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+
     <style>
+    /* CSS bổ sung để căn chỉnh Navbar và nút Giỏ hàng sang phải */
     nav ul {
         display: flex;
         align-items: center;
@@ -12,13 +14,19 @@
         padding: 0;
         margin: 0;
     }
-    nav ul li { margin-right: 15px; }
+
+    nav ul li {
+        margin-right: 15px; /* Khoảng cách giữa các menu */
+    }
+
+    /* Đẩy class này sang tận cùng bên phải */
     .cart-item {
         margin-left: auto;
-        margin-right: 20px;
+        margin-right: 20px; /* Cách lề phải một chút cho đẹp */
     }
+
     .cart-item a {
-        background-color: #ffc107;
+        background-color: #ffc107; /* Màu vàng nổi bật */
         color: #000;
         font-weight: bold;
         padding: 8px 15px;
@@ -26,7 +34,10 @@
         text-decoration: none;
         display: inline-block;
     }
-    .cart-item a:hover { background-color: #e0a800; }
+
+    .cart-item a:hover {
+        background-color: #e0a800;
+    }
     </style>
 </head>
 <body>
@@ -41,10 +52,11 @@
                 <li><a href="{{ route('categories.index') }}">Danh mục</a></li>
                 <li><a href="{{ route('posts.index') }}">Tin tức</a></li>
                 @if(Auth::user()->role == 1)
-                <li><a href="{{ route('user.listUser') }}">Quản lý User</a></li>
+                    <li><a href="{{ route('user.listUser') }}">Quản lý User</a></li>
                 @endif
                 <li><a href="{{ route('signout') }}">Đăng xuất</a></li>
             @endguest
+
             <li class="cart-item">
                 <a href="{{ route('cart.index') }}">
                     🛒 Giỏ hàng ({{ session()->has('cart') ? count(session('cart')) : 0 }})
@@ -55,9 +67,9 @@
 
     <div class="container" style="padding-bottom: 60px;">
         @if(session('success'))
-        <div style="background: #d4edda; color: #155724; padding: 10px; margin: 20px auto; max-width: 400px; border-radius: 5px;">
-            {{ session('success') }}
-        </div>
+            <div style="background: #d4edda; color: #155724; padding: 10px; margin: 20px auto; max-width: 400px; border-radius: 5px;">
+                {{ session('success') }}
+            </div>
         @endif
         @yield('content')
     </div>
