@@ -2,6 +2,14 @@
 @section('title', 'Trang chủ - Siêu thị Mini')
 <!-- @section('content')-->
 @section('content')
+<div class="container mt-3">
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+</div>
 <div class="hero-section text-center py-5 bg-gradient-primary">
     <div class="container">
         <h1 class="display-4 fw-bold mb-4 text-white animate-fade-in">Chào mừng đến Siêu thị Mini</h1>
@@ -24,6 +32,70 @@
         @endguest
     </div>
 </div>
+
+@if(isset($coupons) && $coupons->count() > 0)
+<section class="py-5 bg-white border-bottom">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Ma giam gia dang co</h3>
+                <p class="text-muted mb-0">Ban co the luu ma de dung khi checkout.</p>
+            </div>
+            <a href="{{ route('cart.index') }}" class="btn btn-outline-primary">Mo gio hang</a>
+        </div>
+
+        <div class="row g-3">
+            @foreach($coupons as $coupon)
+                <div class="col-lg-4 col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="mb-0">{{ $coupon->code }}</h5>
+                                @if($coupon->type === 'percent')
+                                    <span class="badge bg-danger">{{ rtrim(rtrim(number_format($coupon->value, 2, '.', ''), '0'), '.') }}%</span>
+                                @else
+                                    <span class="badge bg-danger">-{{ number_format($coupon->value) }} đ</span>
+                                @endif
+                            </div>
+
+                            <p class="text-muted small mb-2">
+                                Don toi thieu:
+                                <strong>{{ $coupon->min_order_value ? number_format($coupon->min_order_value) . ' đ' : 'Khong yeu cau' }}</strong>
+                            </p>
+
+                            @if($coupon->ends_at)
+                                <p class="text-muted small mb-3">Het han: {{ $coupon->ends_at->format('d/m/Y H:i') }}</p>
+                            @else
+                                <p class="text-muted small mb-3">Khong gioi han thoi gian</p>
+                            @endif
+
+                            @auth
+                                @if(in_array((int) $coupon->id, $savedCouponIds ?? [], true))
+                                    <div class="d-flex gap-2">
+                                        <span class="btn btn-sm btn-success disabled">Da luu</span>
+                                        <form method="POST" action="{{ route('coupons.unsave', $coupon) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-outline-danger">Bo luu</button>
+                                        </form>
+                                    </div>
+                                @else
+                                    <form method="POST" action="{{ route('coupons.save', $coupon) }}">
+                                        @csrf
+                                        <button class="btn btn-sm btn-primary">Luu ma nay</button>
+                                    </form>
+                                @endif
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-sm btn-outline-primary">Dang nhap de luu ma</a>
+                            @endauth
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
 
 @if(isset($banners) && $banners->count() > 0)
 <section class="banner-section">

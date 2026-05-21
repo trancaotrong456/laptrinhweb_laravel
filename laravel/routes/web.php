@@ -7,6 +7,9 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CouponController;
+use App\Models\Coupon;
+use App\Models\UserSavedCoupon;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +22,30 @@ Route::get('/', function () {
         ->orderBy('priority', 'desc')
         ->take(4)
         ->get();
-    return view('index', compact('products', 'banners'));
+    $coupons = Coupon::where('is_active', true)
+        ->where(function ($query) {
+            $query->whereNull('starts_at')->orWhere('starts_at', '<=', now());
+        })
+        ->where(function ($query) {
+            $query->whereNull('ends_at')->orWhere('ends_at', '>=', now());
+        })
+        ->where(function ($query) {
+            $query->whereNull('usage_limit')->orWhereColumn('used_count', '<', 'usage_limit');
+        })
+        ->orderByDesc('id')
+        ->take(6)
+        ->get();
+
+    $savedCouponIds = [];
+
+    if (auth()->check()) {
+        $savedCouponIds = UserSavedCoupon::where('user_id', auth()->id())
+            ->pluck('coupon_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    return view('index', compact('products', 'banners', 'coupons', 'savedCouponIds'));
 })->name('home');
 
 // Xem khuyến mãi / Bài viết (Public)
@@ -49,12 +75,17 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{productId}', [CartController::class, 'remove'])->name('cart.remove');
         Route::get('/undo-remove', [CartController::class, 'undoRemove'])->name('cart.undoRemove');
         Route::get('/clear', [CartController::class, 'clear'])->name('cart.clear');
+        Route::post('/coupon/apply', [CartController::class, 'applyCoupon'])->name('cart.coupon.apply');
+        Route::post('/coupon/remove', [CartController::class, 'removeCoupon'])->name('cart.coupon.remove');
     });
 
     // THANH TOÁN (Checkout)
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::post('/checkout', [CartController::class, 'checkout'])->name('checkout.process');
     Route::get('/order-confirmation', [CartController::class, 'orderConfirmation'])->name('order.confirmation');
+
+    Route::post('/coupons/{coupon}/save', [CouponController::class, 'saveForUser'])->name('coupons.save');
+    Route::delete('/coupons/{coupon}/save', [CouponController::class, 'unsaveForUser'])->name('coupons.unsave');
 
     /*
     |--------------------------------------------------------------------------
@@ -77,6 +108,7 @@ Route::middleware(['auth'])->group(function () {
         // QUẢN LÝ SẢN PHẨM & DANH MỤC (Resource)
         Route::resource('products', ProductController::class);
         Route::resource('categories', CategoryController::class);
+        Route::resource('coupons', CouponController::class)->except(['show']);
 
         // QUẢN LÝ KHUYẾN MÃI (Admin CRUD)
         // Lưu ý: route index đã khai báo ở phần Public phía trên

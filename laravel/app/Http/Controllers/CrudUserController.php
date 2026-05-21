@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Http\Controllers;
@@ -10,6 +9,7 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\Coupon;
 
 class CrudUserController extends Controller
 {
@@ -139,12 +139,14 @@ class CrudUserController extends Controller
         $totalProducts = class_exists('\App\Models\Product') ? Product::count() : 0;
         $totalCategories = class_exists('\App\Models\Category') ? Category::count() : 0;
         $totalPosts = class_exists('\App\Models\Post') ? Post::count() : 0;
+        $totalCoupons = class_exists('\App\Models\Coupon') ? Coupon::count() : 0;
 
         return view('crud_user.dashboard', compact(
             'totalUsers', 
             'totalProducts', 
             'totalCategories', 
-            'totalPosts'
+            'totalPosts',
+            'totalCoupons'
         ));
     }
 }
