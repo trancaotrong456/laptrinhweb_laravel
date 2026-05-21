@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\Category;
-use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -14,65 +13,31 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Product::with('category');
+        $keyword = $request->keyword;
+        $category_id = $request->category_id;
 
-        // tìm kiếm
-        $products = $this->searchByName($products, $request);
-
-        // lọc category
-        $products = $this->filterByCategory($products, $request);
-
-        // sắp xếp
-        $products = $this->sortProducts($products, $request);
-
-        // phân trang
-        $products = $this->paginateProducts($products);
+        $products = Product::with('category')
+            ->when($keyword, function ($query, $keyword) {
+                return $query->where('name', 'like', '%' . $keyword . '%');
+            })
+            ->when($category_id, function ($query, $category_id) {
+                return $query->where('category_id', $category_id);
+            })
+            ->paginate(10)
+            ->withQueryString();
 
         $categories = Category::all();
 
-        return view('products.index', [
-            'products' => $products,
-            'keyword' => $request->keyword,
-            'categories' => $categories,
-            'category_id' => $request->category_id
-        ]);
-    }
-
-    // Tìm kiếm theo tên
-    private function searchByName($products, $request)
-    {
-        if ($request->keyword) {
-            $products->where(
-                'name',
-                'like',
-                '%' . $request->keyword . '%'
-            );
-        }
-
-        return $products;
-    }
-
-    // Lọc theo category
-    private function filterByCategory($products, $request)
-    {
-        if ($request->category) {
-
-            $products->whereHas('category', function ($query) use ($request) {
-                $query->where('name', $request->category);
-            });
-        }
-
-        return $products;
-    }
-
-    // Phân trang
-    private function paginateProducts($products)
-    {
-        return $products->paginate(5)->appends(request()->query());
+        return view('products.index', compact(
+            'products',
+            'keyword',
+            'categories',
+            'category_id'
+        ));
     }
 
     /**
-     * Show form create
+     * Show the form for creating a new resource.
      */
     public function create()
     {
@@ -82,7 +47,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Store product
+     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
@@ -90,16 +55,18 @@ class ProductController extends Controller
             'name' => 'required',
             'price' => 'required|numeric',
             'quantity' => 'required|numeric',
-            'image' => 'image|mimes:jpg,png,jpeg|max:2048'
+            'image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
         ]);
 
         $imageName = null;
 
         if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->extension();
 
-            $imageName = $request
-                ->file('image')
-                ->store('products', 'public');
+            $request->image->move(
+                public_path('images'),
+                $imageName
+            );
         }
 
         Product::create([
@@ -107,27 +74,24 @@ class ProductController extends Controller
             'price' => $request->price,
             'quantity' => $request->quantity,
             'image' => $imageName,
-            'category_id' => $request->category_id,
-            'status' => $request->quantity > 0
-                ? 'Còn hàng'
-                : 'Hết hàng'
+            'category_id' => $request->category_id
         ]);
 
-        return redirect()->route('products.index');
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Thêm sản phẩm thành công');
     }
 
     /**
-     * Show detail
+     * Display the specified resource.
      */
-    public function show($id)
+    public function show(Product $product)
     {
-        $product = Product::findOrFail($id);
-
-        return view('products.show', compact('product'));
+        //
     }
 
     /**
-     * Edit form
+     * Show the form for editing the specified resource.
      */
     public function edit($id)
     {
@@ -135,32 +99,35 @@ class ProductController extends Controller
 
         $categories = Category::all();
 
-        return view(
-            'products.edit',
-            compact('product', 'categories')
-        );
+        return view('products.edit', compact(
+            'product',
+            'categories'
+        ));
     }
 
     /**
-     * Update product
+     * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
 
+        $request->validate([
+            'name' => 'required',
+            'price' => 'required|numeric',
+            'quantity' => 'required|numeric',
+            'image' => 'nullable|image|mimes:jpg,png,jpeg|max:2048'
+        ]);
+
         $imageName = $product->image;
 
         if ($request->hasFile('image')) {
+            $imageName = time() . '.' . $request->image->extension();
 
-            // xóa ảnh cũ
-            if ($product->image) {
-                Storage::disk('public')
-                    ->delete($product->image);
-            }
-
-            $imageName = $request
-                ->file('image')
-                ->store('products', 'public');
+            $request->image->move(
+                public_path('images'),
+                $imageName
+            );
         }
 
         $product->update([
@@ -168,46 +135,23 @@ class ProductController extends Controller
             'price' => $request->price,
             'quantity' => $request->quantity,
             'image' => $imageName,
-            'category_id' => $request->category_id,
-            'status' => $request->quantity > 0
-                ? 'Còn hàng'
-                : 'Hết hàng'
+            'category_id' => $request->category_id
         ]);
 
-        return redirect()->route('products.index');
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Cập nhật sản phẩm thành công');
     }
 
     /**
-     * Delete product
+     * Remove the specified resource from storage.
      */
     public function destroy($id)
     {
-        $product = Product::findOrFail($id);
-
-        // xóa ảnh
-        if ($product->image) {
-            Storage::disk('public')
-                ->delete($product->image);
-        }
-
-        $product->delete();
+        Product::destroy($id);
 
         return redirect()
             ->route('products.index')
             ->with('success', 'Xóa sản phẩm thành công');
-    }
-
-    // Sắp xếp
-    public function sortProducts($products, $request)
-    {
-        if ($request->sort == 'price_asc') {
-            $products->orderBy('price', 'asc');
-        } elseif ($request->sort == 'price_desc') {
-            $products->orderBy('price', 'desc');
-        } elseif ($request->sort == 'latest') {
-            $products->latest();
-        }
-
-        return $products;
     }
 }

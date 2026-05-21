@@ -19,21 +19,23 @@
                                 <small class="text-muted">ID: {{ $category->id }}</small>
                             </div>
                         </div>
-                        <div class="btn-group">
-                            <a href="{{ route('categories.edit', $category) }}" class="btn btn-warning">
-                                <i class="fas fa-edit me-1"></i>Chỉnh sửa
-                            </a>
-                            @if($category->products_count == 0)
-                                <form action="{{ route('categories.destroy', $category) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger"
-                                            onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
-                                        <i class="fas fa-trash me-1"></i>Xóa
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
+                        @if(auth()->check() && auth()->user()->role === 1)
+                            <div class="btn-group">
+                                <a href="{{ route('categories.edit', $category) }}" class="btn btn-warning">
+                                    <i class="fas fa-edit me-1"></i>Chỉnh sửa
+                                </a>
+                                @if($category->products()->count() == 0)
+                                    <form action="{{ route('categories.destroy', $category) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger"
+                                                onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+                                            <i class="fas fa-trash me-1"></i>Xóa
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -41,16 +43,14 @@
                     <div class="row">
                         <div class="col-md-8">
                             <h6 class="fw-bold mb-2">Mô tả</h6>
-                            <p class="mb-0">
-                                {{ $category->description ?: 'Chưa có mô tả cho danh mục này.' }}
-                            </p>
+                            <p class="mb-0">{{ $category->description ?: 'Chưa có mô tả cho danh mục này.' }}</p>
                         </div>
                         <div class="col-md-4">
                             <div class="row">
                                 <div class="col-6">
                                     <div class="card bg-primary text-white text-center">
                                         <div class="card-body py-3">
-                                            <h3 class="mb-0">{{ $category->products_count }}</h3>
+                                            <h3 class="mb-0">{{ $category->products()->count() }}</h3>
                                             <small>Sản phẩm</small>
                                         </div>
                                     </div>
@@ -109,14 +109,8 @@
                                                 </div>
                                             @endif
                                         </td>
-                                        <td>
-                                            <strong>{{ $product->name }}</strong>
-                                        </td>
-                                        <td>
-                                            <span class="text-success fw-bold">
-                                                {{ number_format($product->price) }} VNĐ
-                                            </span>
-                                        </td>
+                                        <td><strong>{{ $product->name }}</strong></td>
+                                        <td><span class="text-success fw-bold">{{ number_format($product->price) }} VNĐ</span></td>
                                         <td>
                                             @if($product->quantity > 10)
                                                 <span class="badge bg-success">{{ $product->quantity }}</span>
@@ -126,21 +120,11 @@
                                                 <span class="badge bg-danger">Hết hàng</span>
                                             @endif
                                         </td>
-                                        <td>
-                                            {{ $product->description ? Str::limit($product->description, 30) : 'Chưa có mô tả' }}
-                                        </td>
+                                        <td>{{ $product->description ? Str::limit($product->description, 30) : 'Chưa có mô tả' }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('products.show', $product) }}"
-                                                   class="btn btn-sm btn-outline-info"
-                                                   title="Xem chi tiết">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{{ route('products.edit', $product) }}"
-                                                   class="btn btn-sm btn-outline-warning"
-                                                   title="Chỉnh sửa">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
+                                                <a href="{{ route('products.show', $product) }}" class="btn btn-sm btn-outline-info" title="Xem chi tiết"><i class="fas fa-eye"></i></a>
+                                                <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-outline-warning" title="Chỉnh sửa"><i class="fas fa-edit"></i></a>
                                             </div>
                                         </td>
                                     </tr>
@@ -148,18 +132,12 @@
                                 </tbody>
                             </table>
                         </div>
-
-                        <!-- Phân trang -->
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $products->links() }}
-                        </div>
+                        <div class="d-flex justify-content-center mt-4">{{ $products->links() }}</div>
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                             <h5 class="text-muted">Chưa có sản phẩm nào trong danh mục này</h5>
-                            <p class="text-muted">Hãy thêm sản phẩm đầu tiên vào danh mục "{{ $category->name }}"</p>
-                            <a href="{{ route('products.create') }}?category_id={{ $category->id }}"
-                               class="btn btn-primary">
+                            <a href="{{ route('products.create') }}?category_id={{ $category->id }}" class="btn btn-primary">
                                 <i class="fas fa-plus me-1"></i>Thêm sản phẩm
                             </a>
                         </div>

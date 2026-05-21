@@ -2,19 +2,31 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'type', 'slug', 'description'];
+    use HasFactory;
 
-    public function scopeDoUong($query)
+    protected $fillable = [
+        'name',
+        'description',
+        'parent_id'
+    ];
+
+    public function products()
     {
-        return $query->where('type', 'do_uong');
+        return $this->hasMany(Product::class);
     }
 
-    public function scopeThucPham($query)
+    public function children()
     {
-        return $query->where('type', 'thuc_pham');
+        return $this->hasMany(Category::class, 'parent_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Category::class, 'parent_id');
     }
 }

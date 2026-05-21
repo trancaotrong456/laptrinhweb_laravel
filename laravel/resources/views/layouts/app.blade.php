@@ -9,7 +9,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="{{ asset('css/products.css') }}" rel="stylesheet">
+
     <style>
     * {
         font-family: 'Inter', sans-serif;
@@ -105,7 +105,6 @@
 
     footer {
         margin-top: 0;
-        
     }
 
     .user-dropdown .dropdown-toggle {
@@ -290,10 +289,10 @@
         @yield('content')
     </main>
 
-    <!-- Footer -->
+    
     <footer class="bg-dark text-white text-center py-5 mt-auto">
         <div class="container">
-            <p class="mb-0">© 2024 <strong>Siêu thị Mini</strong> - Trần Cao Trọng - 24211TT1101</p>
+            <p class="mb-0">© 2024 <strong>Siêu thị Mini</strong> - Hồ Hoàng Đức Huy - 24211TT2193</p>
         </div>
     </footer>
 
@@ -332,4 +331,4 @@
     </script>
 </body>
 
-</html>
+</html> 
