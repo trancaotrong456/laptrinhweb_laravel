@@ -15,10 +15,11 @@ class Product extends Model
         'quantity',
         'description',
         'image',
-        'category_id'
+        'category_id',
+        'status'
     ];
 
-    // Quan hệ với category (nhiều products thuộc về 1 category)
+    // Quan hệ với category
     public function category()
     {
         return $this->belongsTo(Category::class);
