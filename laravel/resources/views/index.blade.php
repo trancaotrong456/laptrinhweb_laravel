@@ -20,7 +20,7 @@
 
 </div>
 
-<div class="hero-section text-center py-5 bg-gradient-primary">
+<div class="hero-section home-welcome-banner text-center py-5 bg-gradient-primary">
 
     <div class="container">
 
@@ -309,3 +309,11 @@
 @endif
 
 @endsection
+
+@push('styles')
+<style>
+    .home-welcome-banner {
+        background: linear-gradient(135deg, #00c9ff 0%, #00e5ff 100%);
+    }
+</style>
+@endpush
