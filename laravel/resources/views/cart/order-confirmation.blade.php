@@ -1,132 +1,281 @@
-@extends('layout')
-@section('title', 'Xac nhan don hang - Sieu thi Mini')
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Sieu thi Mini')</title>
 
-@section('content')
-<section class="py-5 bg-light">
-    <div class="container text-center">
-        <h2><i class="fas fa-check-circle text-success me-2"></i>Xac nhan don hang</h2>
-        <p class="text-muted mt-2">Cam on ban da mua hang!</p>
-    </div>
-</section>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                <strong>Thanh cong!</strong> Don hang cua ban da duoc tao.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-            <div class="card mb-4 shadow">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Chi tiet don hang</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <p><strong>Khach hang:</strong></p>
-                            <p>{{ auth()->user()->name }}</p>
-                            <p>{{ auth()->user()->email }}</p>
-                            <p>{{ auth()->user()->phone ?? 'N/A' }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Ngay dat:</strong></p>
-                            <p>{{ \Illuminate\Support\Carbon::parse($order['created_at'])->format('d/m/Y H:i') }}</p>
-                            <p><strong>Phuong thuc thanh toan:</strong></p>
-                            <p>
-                                @switch($order['payment_method'])
-                                    @case('cod')
-                                        <span class="badge bg-info">Thanh toan khi nhan hang</span>
-                                        @break
-                                    @case('bank')
-                                        <span class="badge bg-warning">Chuyen khoan ngan hang</span>
-                                        @break
-                                    @case('wallet')
-                                        <span class="badge bg-success">Vi dien tu</span>
-                                        @break
-                                @endswitch
-                            </p>
-                        </div>
-                    </div>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet">
 
-                    <hr>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(
+                135deg,
+                #667eea 0%,
+                #764ba2 100%
+            );
+        }
 
-                    <h6 class="mb-3"><i class="fas fa-shopping-bag me-2"></i>San pham da dat</h6>
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>San pham</th>
-                                    <th class="text-center">Gia</th>
-                                    <th class="text-center">So luong</th>
-                                    <th class="text-end">Thanh tien</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($order['cart'] as $item)
-                                <tr>
-                                    <td>{{ $item['name'] }}</td>
-                                    <td class="text-center">{{ number_format($item['price'] ?? 0) }} �</td>
-                                    <td class="text-center">{{ $item['quantity'] }}</td>
-                                    <td class="text-end">{{ number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 1)) }} �</td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+        }
 
-                    <hr>
+        .navbar {
+            background: rgba(255, 255, 255, .95);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, .08);
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+        }
 
-                    <div class="row">
-                        <div class="col-md-6"></div>
-                        <div class="col-md-6">
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>Tam tinh:</strong>
-                                <span>{{ number_format($order['subtotal'] ?? $order['total']) }} �</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>Giam gia:</strong>
-                                <span class="text-success">-{{ number_format($order['discount'] ?? 0) }} �</span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>Phi van chuyen:</strong>
-                                <span>{{ number_format($order['shipping_fee'] ?? 0) }} �</span>
-                            </div>
-                            @if(!empty($order['coupon_code']))
-                            <div class="d-flex justify-content-between mb-2">
-                                <strong>Ma giam gia:</strong>
-                                <span class="badge bg-success">{{ $order['coupon_code'] }}</span>
-                            </div>
-                            @endif
-                            <div class="border-top pt-2">
-                                <div class="d-flex justify-content-between">
-                                    <h5>Tong cong:</h5>
-                                    <h5 class="text-success">{{ number_format($order['total']) }} �</h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+        .navbar-brand {
+            font-weight: 800;
+            background: var(--primary-gradient);
 
-                    @if(!empty($order['notes']))
-                    <hr>
-                    <div>
-                        <h6>Ghi chu:</h6>
-                        <p class="text-muted">{{ $order['notes'] }}</p>
-                    </div>
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cart-badge {
+            background: #ee4d2d;
+            color: #fff;
+
+            border-radius: 999px;
+
+            min-width: 18px;
+            height: 18px;
+
+            font-size: 10px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+
+            border-radius: 50%;
+
+            background: var(--primary-gradient);
+
+            color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            font-weight: bold;
+        }
+
+        footer {
+            background: #212529;
+            color: white;
+
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+    </style>
+
+    @stack('styles')
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light mb-4">
+    <div class="container">
+
+        <a class="navbar-brand fs-3" href="{{ route('home') }}">
+            <i class="fas fa-store-alt me-2"></i>
+            Sieu thi Mini
+        </a>
+
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarContent">
+
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       href="{{ route('home') }}">
+                        Trang chu
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link"
+                       href="{{ route('posts.index') }}">
+                        Khuyen mai
+                    </a>
+                </li>
+
+                @auth
+
+                    @if((int) Auth::user()->role === 1)
+
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{{ route('dashboard') }}">
+                                Dashboard
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{{ route('products.index') }}">
+                                Products
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{{ route('categories.index') }}">
+                                Categories
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{{ route('coupons.index') }}">
+                                Coupons
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               href="{{ route('user.listUser') }}">
+                                Users
+                            </a>
+                        </li>
+
                     @endif
-                </div>
+
+                @endauth
+
+            </ul>
+
+            <div class="d-flex align-items-center gap-3">
+
+                @guest
+
+                    <a href="{{ route('login') }}"
+                       class="btn btn-outline-primary rounded-pill">
+
+                        Dang nhap
+                    </a>
+
+                @else
+
+                    @php
+                        $cartQuantity = Session::has('cart')
+                            ? array_sum(
+                                array_column(
+                                    Session::get('cart', []),
+                                    'quantity'
+                                )
+                            )
+                            : \App\Models\UserCartItem
+                                ::where('user_id', Auth::id())
+                                ->sum('quantity');
+                    @endphp
+
+                    <a href="{{ route('cart.index') }}"
+                       class="position-relative p-2 text-dark">
+
+                        <i class="fas fa-shopping-cart fs-4"></i>
+
+                        <span class="cart-badge">
+                            {{ $cartQuantity }}
+                        </span>
+                    </a>
+
+                    <div class="dropdown">
+
+                        <a class="d-flex align-items-center gap-2
+                                  text-decoration-none text-dark
+                                  dropdown-toggle"
+                           href="#"
+                           data-bs-toggle="dropdown">
+
+                            <div class="user-avatar">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </div>
+
+                            <span>
+                                {{ Auth::user()->name }}
+                            </span>
+                        </a>
+
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+
+                            @if((int) Auth::user()->role === 1)
+
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="{{ route('dashboard') }}">
+
+                                        Dashboard
+                                    </a>
+                                </li>
+
+                            @endif
+
+                            <li>
+                                <a class="dropdown-item"
+                                   href="{{ route('signout') }}">
+
+                                    Dang xuat
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+
+                @endguest
+
             </div>
 
-            <div class="d-grid gap-2">
-                <a href="{{ route('home') }}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-arrow-left me-2"></i>Tiep tuc mua sam
-                </a>
-                <a href="{{ route('cart.index') }}" class="btn btn-outline-secondary btn-lg">
-                    <i class="fas fa-shopping-cart me-2"></i>Ve gio hang
-                </a>
-            </div>
         </div>
     </div>
-</div>
-@endsection
+</nav>
+
+<main>
+    @yield('content')
+</main>
+
+<footer>
+    <div class="container text-center">
+        <p class="mb-0">
+            &copy; 2024 Sieu thi Mini
+            - Design by Tran Cao Trong
+        </p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+@stack('scripts')
+
+</body>
+</html>

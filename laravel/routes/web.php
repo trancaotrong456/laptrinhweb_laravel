@@ -13,7 +13,7 @@ use App\Models\UserSavedCoupon;
 
 /*
 |--------------------------------------------------------------------------
-| 1. TRANG CHỦ & PUBLIC ROUTES (Không cần đăng nhập)
+| TRANG CHỦ
 |--------------------------------------------------------------------------
 */
 
@@ -29,15 +29,15 @@ Route::get('/', function () {
     $coupons = Coupon::where('is_active', true)
         ->where(function ($query) {
             $query->whereNull('starts_at')
-                  ->orWhere('starts_at', '<=', now());
+                ->orWhere('starts_at', '<=', now());
         })
         ->where(function ($query) {
             $query->whereNull('ends_at')
-                  ->orWhere('ends_at', '>=', now());
+                ->orWhere('ends_at', '>=', now());
         })
         ->where(function ($query) {
             $query->whereNull('usage_limit')
-                  ->orWhereColumn('used_count', '<', 'usage_limit');
+                ->orWhereColumn('used_count', '<', 'usage_limit');
         })
         ->orderByDesc('id')
         ->take(6)
@@ -48,11 +48,11 @@ Route::get('/', function () {
     if (auth()->check()) {
 
         $savedCouponIds = UserSavedCoupon::where(
-                'user_id',
-                auth()->id()
-            )
+            'user_id',
+            auth()->id()
+        )
             ->pluck('coupon_id')
-            ->map(fn ($id) => (int) $id)
+            ->map(fn($id) => (int) $id)
             ->all();
     }
 
@@ -68,19 +68,23 @@ Route::get('/', function () {
 
 })->name('home');
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC ROUTES
+|--------------------------------------------------------------------------
+*/
 
-// ================= PUBLIC =================
-
-// Khuyến mãi
 Route::get(
     '/khuyen-mai',
     [PostController::class, 'index']
 )->name('posts.index');
 
+/*
+|--------------------------------------------------------------------------
+| LOGIN / REGISTER
+|--------------------------------------------------------------------------
+*/
 
-// ================= AUTH =================
-
-// Login
 Route::get(
     '/login',
     [CrudUserController::class, 'login']
@@ -91,8 +95,6 @@ Route::post(
     [CrudUserController::class, 'authUser']
 )->name('user.authUser');
 
-
-// Register
 Route::get(
     '/register',
     [CrudUserController::class, 'createUser']
@@ -103,23 +105,24 @@ Route::post(
     [CrudUserController::class, 'postUser']
 )->name('user.postUser');
 
-
 /*
 |--------------------------------------------------------------------------
-| 2. ROUTE CẦN ĐĂNG NHẬP
+| AUTH ROUTES
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth'])->group(function () {
 
-    // Logout
     Route::get(
         '/signout',
         [CrudUserController::class, 'signOut']
     )->name('signout');
 
-
-    // ================= CART =================
+    /*
+    |--------------------------------------------------------------------------
+    | CART
+    |--------------------------------------------------------------------------
+    */
 
     Route::prefix('cart')->group(function () {
 
@@ -164,8 +167,11 @@ Route::middleware(['auth'])->group(function () {
         )->name('cart.coupon.remove');
     });
 
-
-    // ================= CHECKOUT =================
+    /*
+    |--------------------------------------------------------------------------
+    | CHECKOUT
+    |--------------------------------------------------------------------------
+    */
 
     Route::get(
         '/checkout',
@@ -182,8 +188,11 @@ Route::middleware(['auth'])->group(function () {
         [CartController::class, 'orderConfirmation']
     )->name('order.confirmation');
 
-
-    // ================= SAVE COUPON =================
+    /*
+    |--------------------------------------------------------------------------
+    | SAVE COUPON
+    |--------------------------------------------------------------------------
+    */
 
     Route::post(
         '/coupons/{coupon}/save',
@@ -195,23 +204,24 @@ Route::middleware(['auth'])->group(function () {
         [CouponController::class, 'unsaveForUser']
     )->name('coupons.unsave');
 
-
     /*
     |--------------------------------------------------------------------------
-    | 3. ROUTE ADMIN
+    | ADMIN
     |--------------------------------------------------------------------------
     */
 
     Route::middleware(['admin'])->group(function () {
 
-        // Dashboard
         Route::get(
             '/dashboard',
             [CrudUserController::class, 'dashboard']
         )->name('dashboard');
 
-
-        // ================= USER =================
+        /*
+        |--------------------------------------------------------------------------
+        | USER
+        |--------------------------------------------------------------------------
+        */
 
         Route::prefix('user')->group(function () {
 
@@ -241,8 +251,11 @@ Route::middleware(['auth'])->group(function () {
             )->name('user.deleteUser');
         });
 
-
-        // ================= RESOURCE =================
+        /*
+        |--------------------------------------------------------------------------
+        | RESOURCE
+        |--------------------------------------------------------------------------
+        */
 
         Route::resource(
             'products',
@@ -259,8 +272,11 @@ Route::middleware(['auth'])->group(function () {
             CouponController::class
         )->except(['show']);
 
-
-        // ================= POSTS ADMIN =================
+        /*
+        |--------------------------------------------------------------------------
+        | POSTS ADMIN
+        |--------------------------------------------------------------------------
+        */
 
         Route::get(
             '/admin/khuyen-mai/them-moi',
