@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -44,22 +43,15 @@ class PostController extends Controller
 
         $this->applySort($query, $filters['sort'] ?? 'priority');
 
-        $sliderPosts = (clone $query)
-            ->where('type', 1)
-            ->take(6)
-            ->get();
-
-        $smallPosts = (clone $query)
-            ->where('type', 0)
-            ->paginate(6)
-            ->withQueryString();
+        $sliderPosts = (clone $query)->where('type', 1)->take(6)->get();
+        $smallPosts  = (clone $query)->where('type', 0)->paginate(6)->withQueryString();
 
         return view('posts.index_post', [
             'sliderPosts' => $sliderPosts,
-            'smallPosts' => $smallPosts,
-            'filters' => $filters,
-            'statuses' => Post::statuses(),
-            'isAdmin' => $isAdmin,
+            'smallPosts'  => $smallPosts,
+            'filters'     => $filters,
+            'statuses'    => Post::statuses(),
+            'isAdmin'     => $isAdmin,
         ]);
     }
 
@@ -81,7 +73,7 @@ class PostController extends Controller
         Post::create($data);
 
         return redirect()->route('posts.index')
-            ->with('success', 'Them khuyen mai thanh cong!');
+            ->with('success', 'Thêm khuyến mãi thành công!');
     }
 
     public function edit($id)
@@ -89,7 +81,7 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
 
         return view('posts.edit_post', [
-            'post' => $post,
+            'post'     => $post,
             'statuses' => Post::statuses(),
         ]);
     }
@@ -110,7 +102,7 @@ class PostController extends Controller
         $post->update($data);
 
         return redirect()->route('posts.index')
-            ->with('success', 'Cap nhat khuyen mai thanh cong!');
+            ->with('success', 'Cập nhật khuyến mãi thành công!');
     }
 
     public function destroy($id)
@@ -121,43 +113,45 @@ class PostController extends Controller
         $post->delete();
 
         return redirect()->route('posts.index')
-            ->with('success', 'Xoa khuyen mai thanh cong!');
+            ->with('success', 'Xóa khuyến mãi thành công!');
     }
 
     private function validatedPostData(Request $request): array
     {
         return $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'type' => 'required|in:0,1',
-            'priority' => 'nullable|integer|min:0',
-            'status' => ['required', Rule::in(array_keys(Post::statuses()))],
+            'title'        => 'required|string|max:255',
+            'content'      => 'required|string',
+            'type'         => 'required|in:0,1',
+            'priority'     => 'nullable|integer|min:0',
+            'status'       => ['required', Rule::in(array_keys(Post::statuses()))],
             'published_at' => 'nullable|date',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
     }
 
     private function storeImage(Request $request): string
-{
-    $image = $request->file('image');
-    $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-    $image->storeAs('public/images', $imageName);
-    return $imageName;
-}
+    {
+        $image     = $request->file('image');
+        $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+        $image->storeAs('public/images', $imageName);
 
-   private function deleteImage(Post $post): void
-{
-    if ($post->image) {
-        \Storage::delete('public/images/' . $post->image);
+        return $imageName;
     }
-}
+
+    private function deleteImage(Post $post): void
+    {
+        if ($post->image) {
+            Storage::delete('public/images/' . $post->image);
+        }
+    }
+
     private function applySort($query, ?string $sort): void
     {
         match ($sort) {
-            'latest' => $query->orderByDesc('created_at'),
-            'oldest' => $query->orderBy('created_at'),
-            'title' => $query->orderBy('title'),
-            default => $query->orderByDesc('priority')->orderByDesc('created_at'),
+            'latest'  => $query->orderByDesc('created_at'),
+            'oldest'  => $query->orderBy('created_at'),
+            'title'   => $query->orderBy('title'),
+            default   => $query->orderByDesc('priority')->orderByDesc('created_at'),
         };
     }
 }
