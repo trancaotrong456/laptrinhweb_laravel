@@ -10,12 +10,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware) {
-        // Thêm đoạn alias này vào đây để đăng ký middleware CheckAdmin với tên 'admin'
+    ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => \App\Http\Middleware\CheckAdmin::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions) {
+    ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();

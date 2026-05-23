@@ -7,76 +7,300 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CouponController;
+use App\Models\Coupon;
+use App\Models\UserSavedCoupon;
 
 /*
 |--------------------------------------------------------------------------
-| TRANG CHỦ & PUBLIC ROUTES
+| TRANG CHỦ
 |--------------------------------------------------------------------------
 */
+
 Route::get('/', function () {
+
     $products = \App\Models\Product::take(8)->get();
+
     $banners = \App\Models\Post::where('type', 1)
         ->orderBy('priority', 'desc')
         ->take(4)
         ->get();
-    return view('index', compact('products', 'banners'));
-})->name('home');
 
-// Đăng nhập / Đăng ký
-Route::get('/login', [CrudUserController::class, 'login'])->name('login');
-Route::post('/login', [CrudUserController::class, 'authUser'])->name('user.authUser');
-Route::get('/register', [CrudUserController::class, 'createUser'])->name('user.createUser');
-Route::post('/register', [CrudUserController::class, 'postUser'])->name('user.postUser');
+    $coupons = Coupon::where('is_active', true)
+        ->where(function ($query) {
+            $query->whereNull('starts_at')
+                ->orWhere('starts_at', '<=', now());
+        })
+        ->where(function ($query) {
+            $query->whereNull('ends_at')
+                ->orWhere('ends_at', '>=', now());
+        })
+        ->where(function ($query) {
+            $query->whereNull('usage_limit')
+                ->orWhereColumn('used_count', '<', 'usage_limit');
+        })
+        ->orderByDesc('id')
+        ->take(6)
+        ->get();
+
+    $savedCouponIds = [];
+
+    if (auth()->check()) {
+
+        $savedCouponIds = UserSavedCoupon::where(
+            'user_id',
+            auth()->id()
+        )
+            ->pluck('coupon_id')
+            ->map(fn($id) => (int) $id)
+            ->all();
+    }
+
+    return view(
+        'index',
+        compact(
+            'products',
+            'banners',
+            'coupons',
+            'savedCouponIds'
+        )
+    );
+
+})->name('home');
 
 /*
 |--------------------------------------------------------------------------
-| ROUTE CẦN ĐĂNG NHẬP (AUTH)
+| PUBLIC ROUTES
 |--------------------------------------------------------------------------
 */
+
+Route::get(
+    '/khuyen-mai',
+    [PostController::class, 'index']
+)->name('posts.index');
+
+/*
+|--------------------------------------------------------------------------
+| LOGIN / REGISTER
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/login',
+    [CrudUserController::class, 'login']
+)->name('login');
+
+Route::post(
+    '/login',
+    [CrudUserController::class, 'authUser']
+)->name('user.authUser');
+
+Route::get(
+    '/register',
+    [CrudUserController::class, 'createUser']
+)->name('user.createUser');
+
+Route::post(
+    '/register',
+    [CrudUserController::class, 'postUser']
+)->name('user.postUser');
+
+/*
+|--------------------------------------------------------------------------
+| AUTH ROUTES
+|--------------------------------------------------------------------------
+*/
+
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/signout', [CrudUserController::class, 'signOut'])->name('signout');
-
-    // GIỎ HÀNG
-    Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index'])->name('cart.index');
-        Route::post('/add', [CartController::class, 'add'])->name('cart.add');
-        Route::post('/update', [CartController::class, 'update'])->name('cart.update');
-        Route::delete('/{productId}', [CartController::class, 'remove'])->name('cart.remove');
-        // Đổi sang GET để dễ gọi từ JavaScript Undo
-        Route::get('/undo-remove', [CartController::class, 'undoRemove'])->name('cart.undoRemove');
-        Route::post('/confirm-selected', [CartController::class, 'confirmSelected'])->name('cart.confirmSelected');
-        Route::get('/clear', [CartController::class, 'clear'])->name('cart.clear');
-    });
-
-    // CHECKOUT
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
-
-    // POSTS / KHUYẾN MÃI (Sửa lỗi trùng posts.index)
-    Route::get('/khuyen-mai', [PostController::class, 'index'])->name('posts.index');
+    Route::get(
+        '/signout',
+        [CrudUserController::class, 'signOut']
+    )->name('signout');
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN ONLY
+    | CART
     |--------------------------------------------------------------------------
     */
+
+    Route::prefix('cart')->group(function () {
+
+        Route::get(
+            '/',
+            [CartController::class, 'index']
+        )->name('cart.index');
+
+        Route::post(
+            '/add',
+            [CartController::class, 'add']
+        )->name('cart.add');
+
+        Route::post(
+            '/update',
+            [CartController::class, 'update']
+        )->name('cart.update');
+
+        Route::delete(
+            '/{productId}',
+            [CartController::class, 'remove']
+        )->name('cart.remove');
+
+        Route::get(
+            '/undo-remove',
+            [CartController::class, 'undoRemove']
+        )->name('cart.undoRemove');
+
+        Route::get(
+            '/clear',
+            [CartController::class, 'clear']
+        )->name('cart.clear');
+
+        Route::post(
+            '/coupon/apply',
+            [CartController::class, 'applyCoupon']
+        )->name('cart.coupon.apply');
+
+        Route::post(
+            '/coupon/remove',
+            [CartController::class, 'removeCoupon']
+        )->name('cart.coupon.remove');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHECKOUT
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/checkout',
+        [CheckoutController::class, 'index']
+    )->name('checkout.index');
+
+    Route::post(
+        '/checkout',
+        [CartController::class, 'checkout']
+    )->name('checkout.process');
+
+    Route::get(
+        '/order-confirmation',
+        [CartController::class, 'orderConfirmation']
+    )->name('order.confirmation');
+
+    /*
+    |--------------------------------------------------------------------------
+    | SAVE COUPON
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/coupons/{coupon}/save',
+        [CouponController::class, 'saveForUser']
+    )->name('coupons.save');
+
+    Route::delete(
+        '/coupons/{coupon}/save',
+        [CouponController::class, 'unsaveForUser']
+    )->name('coupons.unsave');
+
+    /*
+    |--------------------------------------------------------------------------
+    | ADMIN
+    |--------------------------------------------------------------------------
+    */
+
     Route::middleware(['admin'])->group(function () {
-        Route::get('/dashboard', [CrudUserController::class, 'dashboard'])->name('dashboard');
-        
-        // QUẢN LÝ USER
+
+        Route::get(
+            '/dashboard',
+            [CrudUserController::class, 'dashboard']
+        )->name('dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | USER
+        |--------------------------------------------------------------------------
+        */
+
         Route::prefix('user')->group(function () {
-            Route::get('/list', [CrudUserController::class, 'listUser'])->name('user.listUser');
-            Route::get('/read/{id}', [CrudUserController::class, 'readUser'])->name('user.readUser');
-            Route::get('/update/{id}', [CrudUserController::class, 'updateUser'])->name('user.updateUser');
-            Route::post('/update/{id}', [CrudUserController::class, 'postUpdateUser'])->name('user.postUpdateUser');
-            Route::get('/delete/{id}', [CrudUserController::class, 'deleteUser'])->name('user.deleteUser');
+
+            Route::get(
+                '/list',
+                [CrudUserController::class, 'listUser']
+            )->name('user.listUser');
+
+            Route::get(
+                '/read/{id}',
+                [CrudUserController::class, 'readUser']
+            )->name('user.readUser');
+
+            Route::get(
+                '/update/{id}',
+                [CrudUserController::class, 'updateUser']
+            )->name('user.updateUser');
+
+            Route::post(
+                '/update/{id}',
+                [CrudUserController::class, 'postUpdateUser']
+            )->name('user.postUpdateUser');
+
+            Route::get(
+                '/delete/{id}',
+                [CrudUserController::class, 'deleteUser']
+            )->name('user.deleteUser');
         });
 
-        // RESOURCE QUẢN LÝ (Chỉ khai báo 1 lần ở đây)
-        Route::resource('products', ProductController::class);
-        Route::resource('categories', CategoryController::class);
-        // Loại bỏ index để không trùng với route 'khuyen-mai' ở trên
-        Route::resource('posts', PostController::class)->except(['index']);
+        /*
+        |--------------------------------------------------------------------------
+        | RESOURCE
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'products',
+            ProductController::class
+        );
+
+        Route::resource(
+            'categories',
+            CategoryController::class
+        );
+
+        Route::resource(
+            'coupons',
+            CouponController::class
+        )->except(['show']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | POSTS ADMIN
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/admin/khuyen-mai/them-moi',
+            [PostController::class, 'create']
+        )->name('posts.create');
+
+        Route::post(
+            '/admin/khuyen-mai/luu',
+            [PostController::class, 'store']
+        )->name('posts.store');
+
+        Route::get(
+            '/admin/khuyen-mai/{id}/sua',
+            [PostController::class, 'edit']
+        )->name('posts.edit');
+
+        Route::put(
+            '/admin/khuyen-mai/{id}',
+            [PostController::class, 'update']
+        )->name('posts.update');
+
+        Route::delete(
+            '/admin/khuyen-mai/{id}',
+            [PostController::class, 'destroy']
+        )->name('posts.destroy');
     });
 });

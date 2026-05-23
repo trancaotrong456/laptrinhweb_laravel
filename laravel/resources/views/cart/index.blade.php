@@ -1,159 +1,313 @@
-@extends('layout')
+<?php
 
-@section('title', '🛒 Giỏ hàng - Siêu thị Mini')
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CrudUserController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CouponController;
+use App\Models\Coupon;
+use App\Models\UserSavedCoupon;
 
-@section('content')
+/*
+|--------------------------------------------------------------------------
+| 1. TRANG CHỦ & PUBLIC ROUTES
+|--------------------------------------------------------------------------
+*/
 
-<section class="py-5 bg-light">
-    <div class="container d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold">
-            <i class="fas fa-shopping-cart text-primary me-2"></i>
-            Giỏ hàng của bạn
-        </h2>
-        <a href="{{ route('home') }}" class="btn btn-outline-primary">
-            <i class="fas fa-arrow-left me-1"></i> Tiếp tục mua sắm
-        </a>
-    </div>
-</section>
+Route::get('/', function () {
 
-<div class="container py-5">
-    @if(empty($cart) || count($cart) == 0)
-    <div class="text-center py-5">
-        <img src="https://cdn-icons-png.flaticon.com/512/2038/2038854.png" width="150" class="mb-4" alt="Empty Cart">
-        <h3 class="text-muted">Giỏ hàng của bạn đang trống</h3>
-        <p class="text-secondary">Hãy thêm một vài sản phẩm để bắt đầu mua sắm nhé!</p>
-        <a href="{{ route('products.index') }}" class="btn btn-primary btn-lg mt-3">
-            Mua sắm ngay
-        </a>
-    </div>
-    @else
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-0">
-                    <table class="table align-middle mb-0">
-                        <thead class="bg-dark text-white">
-                            <tr>
-                                <th class="ps-4">Sản phẩm</th>
-                                <th class="text-center">Giá</th>
-                                <th class="text-center">Số lượng</th>
-                                <th class="text-end pe-4">Thành tiền</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($cart as $id => $item)
-                            <tr>
-                                <td class="ps-4">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <input type="checkbox" class="form-check-input cart-select"
-                                            name="selected_products[]" value="{{ $id }}" form="cartCheckoutForm">
+    $products = \App\Models\Product::take(8)->get();
 
-                                        @if(!empty($item['image']))
-                                        <img src="{{ asset('images/' . $item['image']) }}" class="rounded shadow-sm"
-                                            width="70" height="70" style="object-fit:cover;">
-                                        @else
-                                        <div class="bg-secondary text-white rounded d-flex align-items-center justify-content-center"
-                                            style="width:70px; height:70px;">N/A</div>
-                                        @endif
+    $banners = \App\Models\Post::where('type', 1)
+        ->orderBy('priority', 'desc')
+        ->take(4)
+        ->get();
 
-                                        <div class="fw-bold text-dark">{{ $item['name'] }}</div>
-                                    </div>
-                                </td>
-                                <td class="text-center text-primary fw-bold">
-                                    {{ number_format($item['price']) }}₫
-                                </td>
-                                <td class="text-center">
-                                    <form method="POST" action="{{ route('cart.update') }}"
-                                        class="d-flex justify-content-center gap-1">
-                                        @csrf
-                                        <input type="hidden" name="product_id" value="{{ $id }}">
-                                        <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="1"
-                                            class="form-control text-center" style="width:70px;">
-                                        <button class="btn btn-sm btn-outline-success">
-                                            <i class="fas fa-sync-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                                <td class="text-end fw-bold">
-                                    {{ number_format($item['price'] * $item['quantity']) }}₫
-                                </td>
-                                <td class="text-center pe-4">
-                                    <form method="POST" action="{{ route('cart.remove', $id) }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-link text-danger p-0" title="Xóa">
-                                            <i class="fas fa-trash-alt fa-lg"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    $coupons = Coupon::where('is_active', true)
+        ->where(function ($query) {
+            $query->whereNull('starts_at')
+                  ->orWhere('starts_at', '<=', now());
+        })
+        ->where(function ($query) {
+            $query->whereNull('ends_at')
+                  ->orWhere('ends_at', '>=', now());
+        })
+        ->where(function ($query) {
+            $query->whereNull('usage_limit')
+                  ->orWhereColumn('used_count', '<', 'usage_limit');
+        })
+        ->orderByDesc('id')
+        ->take(6)
+        ->get();
 
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
-                <div class="card-body">
-                    <h5 class="card-title fw-bold mb-4">Tổng quan đơn hàng</h5>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span>Tạm tính:</span>
-                        <span>{{ number_format($total) }}₫</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span>Phí vận chuyển:</span>
-                        <span class="text-success">Miễn phí</span>
-                    </div>
-                    <hr>
-                    <div class="d-flex justify-content-between mb-4">
-                        <span class="h5 fw-bold">Tổng cộng:</span>
-                        <span class="h5 fw-bold text-danger">{{ number_format($total) }}₫</span>
-                    </div>
+    $savedCouponIds = [];
 
-                    <form id="cartCheckoutForm" method="POST" action="{{ route('cart.confirmSelected') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-lg w-100 mb-2 py-3 shadow">
-                            <i class="fas fa-check-circle me-2"></i> Thanh toán ngay
-                        </button>
-                    </form>
+    if (auth()->check()) {
+        $savedCouponIds = UserSavedCoupon::where('user_id', auth()->id())
+            ->pluck('coupon_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
 
-                    <a href="{{ route('cart.clear') }}" class="btn btn-outline-danger w-100 mt-2"
-                        onclick="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')">
-                        Xóa toàn bộ giỏ hàng
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    @endif
-</div>
+    return view(
+        'index',
+        compact(
+            'products',
+            'banners',
+            'coupons',
+            'savedCouponIds'
+        )
+    );
+})->name('home');
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+/*
+|--------------------------------------------------------------------------
+| POSTS / KHUYẾN MÃI
+|--------------------------------------------------------------------------
+*/
 
-@if(session()->has('cart_last_removed'))
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    Swal.fire({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 5000,
-        timerProgressBar: true,
-        icon: 'success',
-        title: 'Đã xóa sản phẩm.',
-        html: '<button id="btn-undo" class="btn btn-sm btn-dark w-100 mt-2">Hoàn tác ngay</button>',
-        didOpen: () => {
-            document.getElementById('btn-undo').addEventListener('click', () => {
-                window.location.href = "{{ route('cart.undoRemove') }}";
-            });
-        }
+Route::get(
+    '/khuyen-mai',
+    [PostController::class, 'index']
+)->name('posts.index');
+
+/*
+|--------------------------------------------------------------------------
+| AUTH
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/login',
+    [CrudUserController::class, 'login']
+)->name('login');
+
+Route::post(
+    '/login',
+    [CrudUserController::class, 'authUser']
+)->name('user.authUser');
+
+Route::get(
+    '/register',
+    [CrudUserController::class, 'createUser']
+)->name('user.createUser');
+
+Route::post(
+    '/register',
+    [CrudUserController::class, 'postUser']
+)->name('user.postUser');
+
+/*
+|--------------------------------------------------------------------------
+| 2. ROUTE CẦN LOGIN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | ĐĂNG XUẤT
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/signout',
+        [CrudUserController::class, 'signOut']
+    )->name('signout');
+
+    /*
+    |--------------------------------------------------------------------------
+    | CART
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('cart')->group(function () {
+
+        Route::get(
+            '/',
+            [CartController::class, 'index']
+        )->name('cart.index');
+
+        Route::post(
+            '/add',
+            [CartController::class, 'add']
+        )->name('cart.add');
+
+        Route::post(
+            '/update',
+            [CartController::class, 'update']
+        )->name('cart.update');
+
+        Route::delete(
+            '/{productId}',
+            [CartController::class, 'remove']
+        )->name('cart.remove');
+
+        Route::get(
+            '/undo-remove',
+            [CartController::class, 'undoRemove']
+        )->name('cart.undoRemove');
+
+        Route::get(
+            '/clear',
+            [CartController::class, 'clear']
+        )->name('cart.clear');
+
+        Route::post(
+            '/coupon/apply',
+            [CartController::class, 'applyCoupon']
+        )->name('cart.coupon.apply');
+
+        Route::post(
+            '/coupon/remove',
+            [CartController::class, 'removeCoupon']
+        )->name('cart.coupon.remove');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHECKOUT
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/checkout',
+        [CheckoutController::class, 'index']
+    )->name('checkout.index');
+
+    Route::post(
+        '/checkout',
+        [CartController::class, 'checkout']
+    )->name('checkout.process');
+
+    Route::get(
+        '/order-confirmation',
+        [CartController::class, 'orderConfirmation']
+    )->name('order.confirmation');
+
+    /*
+    |--------------------------------------------------------------------------
+    | SAVE COUPON
+    |--------------------------------------------------------------------------
+    */
+
+    Route::post(
+        '/coupons/{coupon}/save',
+        [CouponController::class, 'saveForUser']
+    )->name('coupons.save');
+
+    Route::delete(
+        '/coupons/{coupon}/save',
+        [CouponController::class, 'unsaveForUser']
+    )->name('coupons.unsave');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 3. ADMIN ONLY
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware(['admin'])->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | DASHBOARD
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/dashboard',
+            [CrudUserController::class, 'dashboard']
+        )->name('dashboard');
+
+        /*
+        |--------------------------------------------------------------------------
+        | USER CRUD
+        |--------------------------------------------------------------------------
+        */
+
+        Route::prefix('user')->group(function () {
+
+            Route::get(
+                '/list',
+                [CrudUserController::class, 'listUser']
+            )->name('user.listUser');
+
+            Route::get(
+                '/read/{id}',
+                [CrudUserController::class, 'readUser']
+            )->name('user.readUser');
+
+            Route::get(
+                '/update/{id}',
+                [CrudUserController::class, 'updateUser']
+            )->name('user.updateUser');
+
+            Route::post(
+                '/update/{id}',
+                [CrudUserController::class, 'postUpdateUser']
+            )->name('user.postUpdateUser');
+
+            Route::get(
+                '/delete/{id}',
+                [CrudUserController::class, 'deleteUser']
+            )->name('user.deleteUser');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESOURCE CRUD
+        |--------------------------------------------------------------------------
+        */
+
+        Route::resource(
+            'products',
+            ProductController::class
+        );
+
+        Route::resource(
+            'categories',
+            CategoryController::class
+        );
+
+        Route::resource(
+            'coupons',
+            CouponController::class
+        )->except(['show']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | POSTS CRUD
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/admin/khuyen-mai/them-moi',
+            [PostController::class, 'create']
+        )->name('posts.create');
+
+        Route::post(
+            '/admin/khuyen-mai/luu',
+            [PostController::class, 'store']
+        )->name('posts.store');
+
+        Route::get(
+            '/admin/khuyen-mai/{id}/sua',
+            [PostController::class, 'edit']
+        )->name('posts.edit');
+
+        Route::put(
+            '/admin/khuyen-mai/{id}',
+            [PostController::class, 'update']
+        )->name('posts.update');
+
+        Route::delete(
+            '/admin/khuyen-mai/{id}',
+            [PostController::class, 'destroy']
+        )->name('posts.destroy');
     });
 });
-</script>
-@endif
-
-@endsection

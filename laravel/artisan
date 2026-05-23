@@ -1,18 +1,67 @@
 #!/usr/bin/env php
 <?php
 
-use Illuminate\Foundation\Application;
-use Symfony\Component\Console\Input\ArgvInput;
-
 define('LARAVEL_START', microtime(true));
 
-// Register the Composer autoloader...
+/*
+|--------------------------------------------------------------------------
+| Check If The Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| If the application is in maintenance / demo mode via the "down" command
+| we will load this file so that any pre-rendered views can be shown 
+| instead of starting the framework, which could cause an error.
+|
+*/
+
+if (file_exists($maintenance = __DIR__.'/storage/framework/maintenance.php')) {
+    require $maintenance;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
+
 require __DIR__.'/vendor/autoload.php';
 
-// Bootstrap Laravel and handle the command...
-/** @var Application $app */
+/*
+|--------------------------------------------------------------------------
+| Run The Artisan Application
+|--------------------------------------------------------------------------
+|
+| When we run the artisan command, we need to illuminate the PHP binary
+| so that it can run the appropriate command. We'll let the application
+| handle the rest and we'll terminate with the exit status given.
+|
+*/
+
 $app = require_once __DIR__.'/bootstrap/app.php';
 
-$status = $app->handleCommand(new ArgvInput);
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+$status = $kernel->handle(
+    $input = new Symfony\Component\Console\Input\ArgvInput,
+    new Symfony\Component\Console\Output\ConsoleOutput
+);
+
+/*
+|--------------------------------------------------------------------------
+| Shutdown The Application
+|--------------------------------------------------------------------------
+|
+| Once Artisan has finished running, we will fire off the termination
+| callbacks so that any finally logic can be executed before we exit
+| the script. This will keep things clean and tidy!
+|
+*/
+
+$kernel->terminate($input, $status);
 
 exit($status);

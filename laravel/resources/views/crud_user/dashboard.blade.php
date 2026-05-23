@@ -3,27 +3,163 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div
-    style="max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
-    <h2 style="text-align: center; color: #333;">HỆ THỐNG QUẢN TRỊ</h2>
-    <hr>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
-        <div style="background: #e1f5fe; padding: 20px; border-radius: 8px; text-align: center;">
-            <h3 style="margin: 0; color: #0288d1;">{{ $totalUsers }}</h3>
-            <p style="margin: 5px 0 0;">Người dùng</p>
+
+<div class="container py-4">
+
+    <h2 class="mb-4">
+        Admin Dashboard
+    </h2>
+
+    <div class="row g-3">
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted mb-2">
+                        Users
+                    </h6>
+
+                    <h3 class="mb-0">
+                        {{ $totalUsers }}
+                    </h3>
+
+                </div>
+
+            </div>
+
         </div>
-        <div style="background: #fff3e0; padding: 20px; border-radius: 8px; text-align: center;">
-            <h3 style="margin: 0; color: #f57c00;">{{ $totalProducts }}</h3>
-            <p style="margin: 5px 0 0;">Sản phẩm</p>
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted mb-2">
+                        Products
+                    </h6>
+
+                    <h3 class="mb-0">
+                        {{ $totalProducts }}
+                    </h3>
+
+                </div>
+
+            </div>
+
         </div>
-        <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; text-align: center;">
-            <h3 style="margin: 0; color: #388e3c;">{{ $totalCategories }}</h3>
-            <p style="margin: 5px 0 0;">Danh mục</p>
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted mb-2">
+                        Categories
+                    </h6>
+
+                    <h3 class="mb-0">
+                        {{ $totalCategories }}
+                    </h3>
+
+                </div>
+
+            </div>
+
         </div>
-        <div style="background: #f3e5f5; padding: 20px; border-radius: 8px; text-align: center;">
-            <h3 style="margin: 0; color: #7b1fa2;">{{ $totalPosts }}</h3>
-            <p style="margin: 5px 0 0;">Bài viết</p>
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted mb-2">
+                        Posts
+                    </h6>
+
+                    <h3 class="mb-0">
+                        {{ $totalPosts }}
+                    </h3>
+
+                </div>
+
+            </div>
+
         </div>
+
+        <div class="col-md-3">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body">
+
+                    <h6 class="text-muted mb-2">
+                        Coupons
+                    </h6>
+
+                    <h3 class="mb-0">
+                        {{ $totalCoupons }}
+                    </h3>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
+
+    <div class="card shadow-sm border-0 mt-4">
+
+        <div class="card-body">
+
+            <h5 class="mb-3">
+                Truy cap nhanh
+            </h5>
+
+            <div class="d-flex flex-wrap gap-2">
+
+                <a href="{{ route('products.index') }}"
+                   class="btn btn-primary">
+
+                    Quan ly Products
+                </a>
+
+                <a href="{{ route('categories.index') }}"
+                   class="btn btn-success">
+
+                    Quan ly Categories
+                </a>
+
+                <a href="{{ route('posts.index') }}"
+                   class="btn btn-warning">
+
+                    Quan ly Posts
+                </a>
+
+                <a href="{{ route('coupons.index') }}"
+                   class="btn btn-info text-white">
+
+                    Quan ly Coupons
+                </a>
+
+                <a href="{{ route('user.listUser') }}"
+                   class="btn btn-dark">
+
+                    Quan ly Users
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
 @endsection
