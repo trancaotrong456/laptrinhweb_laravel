@@ -234,6 +234,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const selectAll = document.getElementById('selectAllItems');
@@ -342,14 +343,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     if (checkoutForm && selectedItemsHolder) {
-        checkoutForm.addEventListener('submit', function(event) {
+        checkoutForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
             selectedItemsHolder.innerHTML = '';
 
             const selected = itemCheckboxes().filter(cb => cb.checked);
 
             if (selected.length === 0) {
-                event.preventDefault();
-                alert('Vui lòng chọn ít nhất 1 sản phẩm để thanh toán.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Chưa chọn sản phẩm',
+                    text: 'Vui lòng chọn ít nhất 1 sản phẩm để thanh toán.'
+                });
                 return;
             }
 
@@ -364,14 +369,58 @@ document.addEventListener('DOMContentLoaded', function() {
             if (checkoutCouponCode && pricingMeta) {
                 checkoutCouponCode.value = pricingMeta.dataset.couponCode || '';
             }
+
+            const formData = new FormData(checkoutForm);
+
+            try {
+                const response = await fetch(checkoutForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    body: formData,
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Thanh toán thất bại',
+                        text: data.message || 'Không thể xử lý đơn hàng.'
+                    });
+                    return;
+                }
+
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Đã thanh toán thành công',
+                    text: data.message || 'Đã thanh toán thành công!',
+                    confirmButtonText: 'Tiếp tục',
+                    timer: 1500,
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                });
+
+                window.location.href = data.redirect || '{{ route('
+                order.confirmation ') }}';
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi hệ thống',
+                    text: 'Không thể kết nối đến máy chủ.'
+                });
+            }
         });
     }
 
     recalculateSelected();
     updateSelectAllState();
 
-    @if($errors->has('selected_items') || $errors->has('payment_method') || $errors->has('notes') ||
-        $errors->has('coupon_code'))
+    @if($errors - > has('selected_items') || $errors - > has('payment_method') || $errors - > has('notes') ||
+        $errors - > has('coupon_code'))
     const modalEl = document.getElementById('checkoutModal');
     if (modalEl && window.bootstrap) {
         new bootstrap.Modal(modalEl).show();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Coupon;
 use App\Models\Product;
 use App\Models\UserCartItem;
+use App\Models\UserSavedCoupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -20,6 +21,8 @@ class CartController extends Controller
         $cart = $this->getCart();
 
         $total = $this->calculateSubtotal($cart);
+
+        $this->maybeAutoApplyCoupon($cart, $total);
 
         $couponView = $this->buildCouponViewData($total);
 
@@ -414,6 +417,13 @@ public function add(Request $request)
 
         if (empty($cart)) {
 
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Giỏ hàng trống!',
+                ], 422);
+            }
+
             return redirect()
                 ->route('cart.index')
                 ->with('error', 'Giỏ hàng trống!');
@@ -436,6 +446,13 @@ public function add(Request $request)
         }
 
         if (empty($selectedCart)) {
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng chọn sản phẩm!',
+                ], 422);
+            }
 
             return redirect()
                 ->route('cart.index')
@@ -464,6 +481,13 @@ public function add(Request $request)
                 !$couponUsed ||
                 !$couponUsed->isCurrentlyValid()
             ) {
+
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Mã giảm giá không hợp lệ.',
+                    ], 422);
+                }
 
                 return redirect()
                     ->route('cart.index')
@@ -541,9 +565,24 @@ public function add(Request $request)
 
         $this->syncSessionCart();
 
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã thanh toán thành công!',
+                'redirect' => route('order.confirmation'),
+                'order' => [
+                    'subtotal' => $subtotal,
+                    'discount' => $discount,
+                    'shipping_fee' => $shippingFee,
+                    'total' => $grandTotal,
+                    'coupon_code' => $couponUsed?->code,
+                ],
+            ]);
+        }
+
         return redirect()
             ->route('order.confirmation')
-            ->with('success', 'Đặt hàng thành công!');
+            ->with('success', 'Đã thanh toán thành công!');
     }
 
     // ================= ORDER CONFIRMATION =================
@@ -599,6 +638,79 @@ public function add(Request $request)
     private function syncSessionCart(): void
     {
         $this->getCart();
+    }
+
+    // ================= AUTO APPLY COUPON =================
+    private function maybeAutoApplyCoupon(array $cart, float $subtotal): void
+    {
+        if (empty($cart) || $subtotal <= 0) {
+            Session::forget('cart_coupon');
+            return;
+        }
+
+        $currentCode = (string) data_get(Session::get('cart_coupon', []), 'code', '');
+
+        if ($currentCode !== '') {
+            $currentCoupon = Coupon::whereRaw(
+                'UPPER(code) = ?',
+                [strtoupper($currentCode)]
+            )->first();
+
+            if (
+                $currentCoupon &&
+                $currentCoupon->isCurrentlyValid() &&
+                (is_null($currentCoupon->min_order_value) || $subtotal >= (float) $currentCoupon->min_order_value)
+            ) {
+                return;
+            }
+
+            Session::forget('cart_coupon');
+        }
+
+        $bestCoupon = $this->resolveBestAutoCoupon($subtotal);
+
+        if ($bestCoupon) {
+            Session::put('cart_coupon', [
+                'code' => $bestCoupon->code,
+            ]);
+        }
+    }
+
+    // ================= BEST COUPON =================
+    private function resolveBestAutoCoupon(float $subtotal): ?Coupon
+    {
+        $candidateCoupons = Coupon::query()
+            ->where(function ($query) {
+                $query->where('is_active', true)
+                    ->orWhereIn('id', UserSavedCoupon::where('user_id', auth()->id())->pluck('coupon_id'));
+            })
+            ->get()
+            ->unique('id');
+
+        $bestCoupon = null;
+        $bestDiscount = 0.0;
+
+        foreach ($candidateCoupons as $coupon) {
+            if (
+                !$coupon->isCurrentlyValid() ||
+                (!is_null($coupon->min_order_value) && $subtotal < (float) $coupon->min_order_value)
+            ) {
+                continue;
+            }
+
+            $discount = $this->calculateCouponDiscount($coupon, $subtotal);
+
+            if ($discount <= 0) {
+                continue;
+            }
+
+            if ($discount > $bestDiscount) {
+                $bestDiscount = $discount;
+                $bestCoupon = $coupon;
+            }
+        }
+
+        return $bestCoupon;
     }
 
     // ================= SUBTOTAL =================
