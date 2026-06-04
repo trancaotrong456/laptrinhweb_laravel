@@ -6,13 +6,10 @@
 /public/build
 /storage/*.key
 /storage/pail/
-/bootstrap/cache/
 /storage/framework/cache/data/
 /storage/framework/sessions/
 /storage/framework/views/
 /storage/logs/
-
-
 
 # --- Cấu hình nhạy cảm (CỰC KỲ QUAN TRỌNG) ---
 .env

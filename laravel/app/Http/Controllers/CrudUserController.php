@@ -41,8 +41,9 @@ class CrudUserController extends Controller
     // 3. Hiển thị trang đăng ký
     public function createUser()
     {
-        return view('crud_user.register'); 
+        return view('crud_user.registration');
     }
+
 
     // 4. Xử lý logic Đăng ký (Đã bảo mật mã hóa Bcrypt tránh lỗi password)
     public function postUser(Request $request)
@@ -128,5 +129,15 @@ class CrudUserController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
         return redirect()->route('user.listUser')->with('success', 'Xóa thành công!');
+    }
+
+    /**
+     * Cấp quyền admin cho người dùng
+     */
+    public function promoteUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->update(['role' => 'admin']);
+        return redirect()->route('user.listUser')->with('success', 'Cấp quyền Admin cho "' . $user->name . '" thành công!');
     }
 }
