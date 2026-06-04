@@ -1,0 +1,24 @@
+.user-drop-trigger {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 16px;
+    border-radius: 12px
+}
+
+.user-drop {
+    position: relative
+}
+
+.user-drop-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    z-index: 1000
+}
+
+.user-drop.openUserDrop .user-drop-menu {
+    display: block
+}
