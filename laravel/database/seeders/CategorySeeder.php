@@ -20,7 +20,7 @@ class CategorySeeder extends Seeder
 
         DB::table('categories')->insert([
             [
-                'id' => 1,
+                'id' => 6,
                 'name' => 'Trái Cây',
                 'type' => 'thuc_pham',
                 'slug' => 'trai-cay',
@@ -30,7 +30,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 2,
+                'id' => 3,
                 'name' => 'Rau củ',
                 'type' => 'thuc_pham',
                 'slug' => 'rau-cu',
@@ -40,7 +40,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 3,
+                'id' => 5,
                 'name' => 'Thịt & Hải sản',
                 'type' => 'thuc_pham',
                 'slug' => 'thit-hai-san',
@@ -60,7 +60,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 5,
+                'id' => 1,
                 'name' => 'Bánh Kẹo',
                 'type' => 'do_uong',
                 'slug' => 'banh-keo',
@@ -70,7 +70,7 @@ class CategorySeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'id' => 6,
+                'id' => 2,
                 'name' => 'Đồ uống',
                 'type' => 'do_uong',
                 'slug' => 'do-uong',
