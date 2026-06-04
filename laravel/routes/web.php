@@ -178,6 +178,40 @@ Route::get(
     [PostController::class, 'index']
 )->name('posts.index');
 
+Route::get(
+    '/khuyen-mai/{id}',
+    [PostController::class, 'show']
+)->name('posts.show');
+
+// Routes chỉ dành cho admin (tạo/sửa/xóa bài viết)
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    Route::get(
+        '/admin/khuyen-mai/them-moi',
+        [PostController::class, 'create']
+    )->name('posts.create');
+
+    Route::post(
+        '/admin/khuyen-mai',
+        [PostController::class, 'store']
+    )->name('posts.store');
+
+    Route::get(
+        '/admin/khuyen-mai/{id}/chinh-sua',
+        [PostController::class, 'edit']
+    )->name('posts.edit');
+
+    Route::put(
+        '/admin/khuyen-mai/{id}',
+        [PostController::class, 'update']
+    )->name('posts.update');
+
+    Route::delete(
+        '/admin/khuyen-mai/{id}',
+        [PostController::class, 'destroy']
+    )->name('posts.destroy');
+});
+
 
 /*
 |--------------------------------------------------------------------------
@@ -313,6 +347,16 @@ Route::middleware(['auth'])->group(function () {
         '/coupons/saved',
         [SavedCouponController::class, 'index']
     )->name('coupons.saved');
+
+    /*
+    |--------------------------------------------------------------------------
+    | POSTS (LIKE / COMMENT)
+    |--------------------------------------------------------------------------
+    */
+    Route::post('/khuyen-mai/{id}/like', [PostController::class, 'toggleLike'])->name('posts.like.toggle');
+    Route::post('/khuyen-mai/{id}/comments', [PostController::class, 'storeComment'])->name('posts.comment.store');
+    Route::put('/khuyen-mai/comments/{commentId}', [PostController::class, 'updateComment'])->name('posts.comment.update');
+    Route::delete('/khuyen-mai/comments/{commentId}', [PostController::class, 'destroyComment'])->name('posts.comment.destroy');
 
 
     /*

@@ -1,247 +1,243 @@
 @extends('layout')
 
-@section('title', 'Đăng ký thành viên - Siêu thị Mini')
+@section('title', 'Đăng ký thành viên - Siêu thị trực tuyến')
 
 @section('content')
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-6">
 
-            <div class="card border-0 shadow-xl rounded-5 overflow-hidden">
+<style>
+/* Tổng thể nền */
+body {
+    background-color: #f2f9f4;
+    /* Màu nền xanh nhạt giống ảnh */
+}
 
-                {{-- HEADER --}}
-                <div class="card-header bg-gradient-primary text-white text-center py-4">
-                    <i class="fas fa-user-plus fa-3x mb-3 opacity-90"></i>
+.auth-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: 40px 15px;
+}
 
-                    <h1 class="h3 fw-bold mb-1">
-                        Đăng ký tài khoản
-                    </h1>
+/* Header Logo */
+.brand-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
 
-                    <p class="mb-0 opacity-90">
-                        Trở thành thành viên để nhận ưu đãi đặc biệt
-                    </p>
+.brand-icon {
+    background-color: #2e7d32;
+    /* Xanh lá đậm */
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.brand-text {
+    color: #1b5e20;
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+}
+
+/* Card Form */
+.auth-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 650px;
+    /* Thu gọn lại một chút cho form cân đối hơn */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.auth-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #212121;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.auth-subtitle {
+    font-size: 14px;
+    color: #9e9e9e;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Inputs & Labels */
+.form-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #616161;
+    margin-bottom: 6px;
+}
+
+.form-control-custom {
+    border-radius: 10px;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    background-color: #fafafa;
+    width: 100%;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.form-control-custom:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    background-color: #ffffff;
+}
+
+/* Button */
+.btn-submit {
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    width: 100%;
+    margin-top: 10px;
+    transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+    background-color: #1b5e20;
+}
+
+/* Radio/Checkbox custom */
+.form-check-input:checked {
+    background-color: #2e7d32;
+    border-color: #2e7d32;
+}
+
+/* Footer text */
+.auth-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #9e9e9e;
+}
+
+.auth-footer a {
+    color: #2e7d32;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+</style>
+
+<div class="auth-wrapper">
+    {{-- Header Logo --}}
+    <div class="brand-header">
+        <div class="brand-icon">
+            <i class="fas fa-leaf"></i>
+        </div>
+        <h1 class="brand-text">Siêu thị trực tuyến</h1>
+    </div>
+
+    {{-- Form Container --}}
+    <div class="auth-card">
+        <h2 class="auth-title">Đăng ký tài khoản mới!</h2>
+        <p class="auth-subtitle">Trở thành thành viên để nhận các ưu đãi đặc biệt</p>
+
+        {{-- ERROR ALERT --}}
+        @if ($errors->any())
+        <div class="alert alert-danger"
+            style="border-radius: 10px; font-size: 14px; background-color: #ffebee; border: none; color: #c62828;">
+            <div style="font-weight: 700; margin-bottom: 5px;">
+                <i class="fas fa-exclamation-triangle"></i> Có lỗi xảy ra:
+            </div>
+            <ul class="mb-0 ps-3">
+                @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+        @endif
+
+        <form action="{{ route('user.postUser') }}" method="POST">
+            @csrf
+
+            <div class="row g-3">
+                {{-- HỌ VÀ TÊN --}}
+                <div class="col-md-6">
+                    <label class="form-label">Họ và tên</label>
+                    <input type="text" name="name" class="form-control-custom" placeholder="Nhập họ và tên..."
+                        value="{{ old('name') }}" required>
                 </div>
 
-                {{-- BODY --}}
-                <div class="card-body p-5">
+                {{-- EMAIL --}}
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control-custom" placeholder="example@email.com"
+                        value="{{ old('email') }}" required>
+                </div>
 
-                    {{-- ERROR --}}
-                    @if ($errors->any())
-                    <div class="alert alert-danger rounded-4 shadow-sm mb-4">
-                        <h6 class="mb-3">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Có lỗi xảy ra:
-                        </h6>
+                {{-- SỐ ĐIỆN THOẠI --}}
+                <div class="col-md-6">
+                    <label class="form-label">Số điện thoại</label>
+                    <input type="tel" name="phone" class="form-control-custom" placeholder="0123456789"
+                        value="{{ old('phone') }}">
+                </div>
 
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                {{-- ĐỊA CHỈ --}}
+                <div class="col-md-6">
+                    <label class="form-label">Địa chỉ</label>
+                    <input type="text" name="address" class="form-control-custom" placeholder="Nhập địa chỉ của bạn..."
+                        value="{{ old('address') }}">
+                </div>
+
+                {{-- MẬT KHẨU --}}
+                <div class="col-md-12 mt-2">
+                    <label class="form-label">Mật khẩu</label>
+                    <input type="password" name="password" class="form-control-custom"
+                        placeholder="Nhập mật khẩu (Tối thiểu 6 ký tự)..." required>
+                </div>
+
+                {{-- ĐIỀU KHOẢN --}}
+                <div class="col-md-12 mt-3 mb-2">
+                    <div class="d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" id="terms" required
+                            style="cursor: pointer;">
+                        <label class="form-check-label" for="terms"
+                            style="font-size: 14px; color: #616161; cursor: pointer;">
+                            Tôi đồng ý với các <a href="#"
+                                style="color: #2e7d32; font-weight: 700; text-decoration: none;">điều khoản dịch vụ</a>
+                        </label>
                     </div>
-                    @endif
+                </div>
 
-                    {{-- FORM --}}
-                    <form action="{{ route('user.postUser') }}" method="POST" class="row g-4">
-                        @csrf
-
-                        {{-- HỌ TÊN --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Họ và tên
-                            </label>
-
-                            <input type="text" name="name" class="form-control form-control-lg"
-                                value="{{ old('name') }}" required>
-                        </div>
-
-                        {{-- EMAIL --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Email
-                            </label>
-
-                            <input type="email" name="email" class="form-control form-control-lg"
-                                value="{{ old('email') }}" required>
-                        </div>
-
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Ngày sinh
-                            </label>
-
-                            <input type="date" name="dob" class="form-control form-control-lg" value="{{ old('dob') }}">
-                        </div>
-
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Giới tính
-                            </label>
-
-                            <div class="mt-2">
-
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" value="Nam" checked>
-
-                                    <label class="form-check-label">
-                                        Nam
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" value="Nữ">
-
-                                    <label class="form-check-label">
-                                        Nữ
-                                    </label>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        {{-- NGHỀ NGHIỆP --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Nghề nghiệp
-                            </label>
-
-                            <select name="job" class="form-select form-select-lg">
-
-                                <option value="Giáo viên">
-                                    Giáo viên
-                                </option>
-
-                                <option value="Sinh viên">
-                                    Sinh viên
-                                </option>
-
-                                <option value="Khác">
-                                    Khác
-                                </option>
-
-                            </select>
-                        </div>
-
-
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Sở thích
-                            </label>
-
-                            <input type="text" name="like" class="form-control form-control-lg"
-                                placeholder="Nhập sở thích, cách nhau dấu phẩy" value="{{ old('like') }}">
-                        </div>
-
-                        {{-- PHONE --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Số điện thoại
-                            </label>
-
-                            <input type="tel" name="phone" class="form-control form-control-lg"
-                                value="{{ old('phone') }}" placeholder="0123456789">
-                        </div>
-
-                        {{-- ADDRESS --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Địa chỉ
-                            </label>
-
-                            <input type="text" name="address" class="form-control form-control-lg"
-                                value="{{ old('address') }}" placeholder="Nhập địa chỉ">
-                        </div>
-
-                        {{-- PASSWORD --}}
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">
-                                Mật khẩu
-                            </label>
-
-                            <input type="password" name="password" class="form-control form-control-lg" required>
-
-                            <div class="form-text">
-                                Tối thiểu 6 ký tự
-                            </div>
-                        </div>
-
-                        {{-- TERMS --}}
-                        <div class="col-12">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" required>
-
-                                <label class="form-check-label">
-                                    Tôi đồng ý với điều khoản dịch vụ
-                                </label>
-                            </div>
-                        </div>
-
-                        {{-- BUTTON --}}
-                        <div class="col-12">
-                            <button type="submit"
-                                class="btn btn-primary btn-lg w-100 rounded-pill shadow-lg py-3 fw-bold">
-
-                                🚀 Tạo tài khoản ngay
-                            </button>
-                        </div>
-
-                        {{-- LOGIN --}}
-                        <div class="col-12 text-center">
-                            <small class="text-muted">
-                                Đã có tài khoản?
-
-                                <a href="{{ route('login') }}" class="text-decoration-none fw-semibold">
-
-                                    Đăng nhập
-                                </a>
-                            </small>
-                        </div>
-
-                    </form>
+                {{-- BUTTON SUBMIT --}}
+                <div class="col-md-12">
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-user-plus me-2"></i> Đăng ký ngay
+                    </button>
                 </div>
             </div>
 
+        </form>
+
+        {{-- LOGIN LINK --}}
+        <div class="auth-footer">
+            Đã có tài khoản? <a href="{{ route('login') }}">Đăng nhập ngay</a>
         </div>
     </div>
 </div>
-
-<style>
-.card {
-    border: 1px solid rgba(0, 0, 0, .05);
-    transition: .3s ease;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, .15);
-}
-
-.bg-gradient-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    border: none;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: #4facfe;
-    box-shadow: 0 0 0 .25rem rgba(79, 172, 254, .15);
-}
-
-.shadow-xl {
-    box-shadow:
-        0 20px 25px -5px rgba(0, 0, 0, .1),
-        0 10px 10px -5px rgba(0, 0, 0, .04);
-}
-</style>
 
 @endsection
