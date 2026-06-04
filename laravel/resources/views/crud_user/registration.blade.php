@@ -1,106 +1,164 @@
 @extends('layout')
 
-@section('title', 'Quản trị - Dashboard')
+@section('title', 'Đăng ký thành viên - Siêu thị Mini')
 
 @section('content')
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
 
-{{-- BREADCRUMB --}}
-<div class="breadcrumb-bar">
-    <div class="container">
-        <a href="{{ route('home') }}">Trang chủ</a>
-        <span class="sep">›</span>
-        <span class="cur">Admin Dashboard</span>
+            <div class="card border-0 shadow-xl rounded-5 overflow-hidden">
+
+                <div class="card-header bg-gradient-primary text-white text-center py-4">
+                    <i class="fas fa-user-plus fa-3x mb-3 opacity-90"></i>
+                    <h1 class="h3 fw-bold mb-1">Đăng ký tài khoản</h1>
+                    <p class="mb-0 opacity-90">Trở thành thành viên để nhận ưu đãi đặc biệt</p>
+                </div>
+
+                <div class="card-body p-5">
+
+                    @if ($errors->any())
+                    <div class="alert alert-danger rounded-4 shadow-sm mb-4">
+                        <h6 class="mb-3"><i class="fas fa-exclamation-triangle me-2"></i>Có lỗi xảy ra:</h6>
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                    <form action="{{ route('user.postUser') }}" method="POST" class="row g-4">
+                        @csrf
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Họ và tên</label>
+                            <input type="text" name="name" class="form-control form-control-lg"
+                                value="{{ old('name') }}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email</label>
+                            <input type="email" name="email" class="form-control form-control-lg"
+                                value="{{ old('email') }}" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Ngày sinh</label>
+                            <input type="date" name="dob" class="form-control form-control-lg" value="{{ old('dob') }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Giới tính</label>
+                            <div class="mt-2">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" value="Nam" checked>
+                                    <label class="form-check-label">Nam</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="gender" value="Nữ">
+                                    <label class="form-check-label">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Nghề nghiệp</label>
+                            <select name="job" class="form-select form-select-lg">
+                                <option value="Giáo viên">Giáo viên</option>
+                                <option value="Sinh viên">Sinh viên</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Sở thích</label>
+                            <input type="text" name="like" class="form-control form-control-lg"
+                                placeholder="Nhập sở thích, cách nhau dấu phẩy" value="{{ old('like') }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Số điện thoại</label>
+                            <input type="tel" name="phone" class="form-control form-control-lg"
+                                value="{{ old('phone') }}" placeholder="0123456789">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Địa chỉ</label>
+                            <input type="text" name="address" class="form-control form-control-lg"
+                                value="{{ old('address') }}" placeholder="Nhập địa chỉ">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Mật khẩu</label>
+                            <input type="password" name="password" class="form-control form-control-lg" required>
+                            <div class="form-text">Tối thiểu 6 ký tự</div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" required>
+                                <label class="form-check-label">Tôi đồng ý với điều khoản dịch vụ</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <button type="submit"
+                                class="btn btn-primary btn-lg w-100 rounded-pill shadow-lg py-3 fw-bold">
+                                🚀 Tạo tài khoản ngay
+                            </button>
+                        </div>
+
+                        <div class="col-12 text-center">
+                            <small class="text-muted">
+                                Đã có tài khoản?
+                                <a href="{{ route('login') }}" class="text-decoration-none fw-semibold">Đăng nhập</a>
+                            </small>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 
-<div class="container py-4">
-    
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-        <h2 style="font-size:22px;font-weight:800;margin:0;">
-            <i class="fas fa-chart-line" style="color:#2e7d32;"></i> Bảng Điều Khiển
-        </h2>
-    </div>
+<style>
+.card {
+    border: 1px solid rgba(0, 0, 0, .05);
+    transition: .3s ease;
+}
 
-    <div class="row g-3">
-        {{-- USERS --}}
-        <div class="col-md-3 col-sm-6">
-            <div class="card-white" style="text-align:center;padding:24px;">
-                <div style="width:50px;height:50px;background:#e3f2fd;color:#1565c0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div style="font-size:13px;color:#757575;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Người dùng</div>
-                <div style="font-size:24px;font-weight:800;color:#212121;">{{ $totalUsers ?? 0 }}</div>
-            </div>
-        </div>
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, .15);
+}
 
-        {{-- PRODUCTS --}}
-        <div class="col-md-3 col-sm-6">
-            <div class="card-white" style="text-align:center;padding:24px;">
-                <div style="width:50px;height:50px;background:#e8f5e9;color:#2e7d32;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;">
-                    <i class="fas fa-box-open"></i>
-                </div>
-                <div style="font-size:13px;color:#757575;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Sản phẩm</div>
-                <div style="font-size:24px;font-weight:800;color:#212121;">{{ $totalProducts ?? 0 }}</div>
-            </div>
-        </div>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
 
-        {{-- CATEGORIES --}}
-        <div class="col-md-3 col-sm-6">
-            <div class="card-white" style="text-align:center;padding:24px;">
-                <div style="width:50px;height:50px;background:#fff3e0;color:#ef6c00;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;">
-                    <i class="fas fa-layer-group"></i>
-                </div>
-                <div style="font-size:13px;color:#757575;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Danh mục</div>
-                <div style="font-size:24px;font-weight:800;color:#212121;">{{ $totalCategories ?? 0 }}</div>
-            </div>
-        </div>
+.btn-primary {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border: none;
+}
 
-        {{-- POSTS --}}
-        <div class="col-md-3 col-sm-6">
-            <div class="card-white" style="text-align:center;padding:24px;">
-                <div style="width:50px;height:50px;background:#fce4ec;color:#c2185b;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;">
-                    <i class="fas fa-newspaper"></i>
-                </div>
-                <div style="font-size:13px;color:#757575;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Khuyến mãi</div>
-                <div style="font-size:24px;font-weight:800;color:#212121;">{{ $totalPosts ?? 0 }}</div>
-            </div>
-        </div>
+.btn-primary:hover {
+    transform: translateY(-2px);
+}
 
-        {{-- COUPONS --}}
-        <div class="col-md-3 col-sm-6">
-            <div class="card-white" style="text-align:center;padding:24px;">
-                <div style="width:50px;height:50px;background:#f3e5f5;color:#7b1fa2;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px;">
-                    <i class="fas fa-ticket-alt"></i>
-                </div>
-                <div style="font-size:13px;color:#757575;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Voucher</div>
-                <div style="font-size:24px;font-weight:800;color:#212121;">{{ $totalCoupons ?? 0 }}</div>
-            </div>
-        </div>
-    </div>
+.form-control:focus,
+.form-select:focus {
+    border-color: #4facfe;
+    box-shadow: 0 0 0 .25rem rgba(79, 172, 254, .15);
+}
 
-    {{-- QUICK ACCESS --}}
-    <div class="card-white mt-4">
-        <h5 style="font-size:16px;font-weight:800;color:#212121;margin-bottom:16px;">
-            <i class="fas fa-bolt" style="color:#fbc02d;"></i> Truy cập nhanh
-        </h5>
-        <div style="display:flex;flex-wrap:wrap;gap:12px;">
-            <a href="{{ route('products.index') }}" class="btn-green-outline" style="background:#e8f5e9;color:#2e7d32;border-color:#c8e6c9;">
-                <i class="fas fa-box-open"></i> Quản lý Sản phẩm
-            </a>
-            <a href="{{ route('categories.index') }}" class="btn-green-outline" style="background:#fff3e0;color:#ef6c00;border-color:#ffe0b2;">
-                <i class="fas fa-layer-group"></i> Quản lý Danh mục
-            </a>
-            <a href="{{ route('posts.index') }}" class="btn-green-outline" style="background:#fce4ec;color:#c2185b;border-color:#f8bbd0;">
-                <i class="fas fa-tags"></i> Quản lý Khuyến mãi
-            </a>
-            <a href="{{ route('coupons.index') }}" class="btn-green-outline" style="background:#f3e5f5;color:#7b1fa2;border-color:#e1bee7;">
-                <i class="fas fa-percent"></i> Quản lý Voucher
-            </a>
-            <a href="{{ route('user.listUser') }}" class="btn-green-outline" style="background:#e3f2fd;color:#1565c0;border-color:#bbdefb;">
-                <i class="fas fa-users"></i> Quản lý Người dùng
-            </a>
-        </div>
-    </div>
-</div>
+.shadow-xl {
+    box-shadow:
+        0 20px 25px -5px rgba(0, 0, 0, .1),
+        0 10px 10px -5px rgba(0, 0, 0, .04);
+}
+</style>
 
 @endsection

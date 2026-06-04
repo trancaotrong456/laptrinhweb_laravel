@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -13,48 +12,69 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('categories')->insertOrIgnore([
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+        DB::table('categories')->truncate();
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        DB::table('categories')->insert([
             [
+                'id' => 6,
+                'name' => 'Trái Cây',
+                'type' => 'thuc_pham',
+                'slug' => 'trai-cay',
+                'description' => 'Trái Cây Nhập Khẩu',
+                'parent_id' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 3,
                 'name' => 'Rau củ',
                 'type' => 'thuc_pham',
                 'slug' => 'rau-cu',
-                'description' => 'Rau xanh và các loại củ quả tươi mới, hữu cơ, trồng theo tiêu chuẩn nông nghiệp hiện đại.',
+                'description' => 'Rau củ tươi, Siêu Sạch',
                 'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Thịt & hải sản',
+                'id' => 5,
+                'name' => 'Thịt & Hải sản',
                 'type' => 'thuc_pham',
                 'slug' => 'thit-hai-san',
-                'description' => 'Thịt tươi, hải sản sạch, được chọn lọc kỹ càng từ các nguồn cung ứng uy tín.',
+                'description' => 'Thịt và Hải sản tươi',
                 'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
+                'id' => 4,
                 'name' => 'Sữa & Trứng',
                 'type' => 'thuc_pham',
                 'slug' => 'sua-trung',
-                'description' => 'Sữa, trứng và các sản phẩm từ động vật, đảm bảo dinh dưỡng và sức khỏe cho cả gia đình.',
+                'description' => 'Sữa và Trứng',
                 'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Bánh kẹo',
+                'id' => 1,
+                'name' => 'Bánh Kẹo',
                 'type' => 'do_uong',
                 'slug' => 'banh-keo',
-                'description' => 'Bánh, kẹo, snack vặt chất lượng, thích hợp cho tất cả mọi người trong gia đình.',
+                'description' => 'Các loại bánh kẹo',
                 'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
+                'id' => 2,
                 'name' => 'Đồ uống',
                 'type' => 'do_uong',
                 'slug' => 'do-uong',
-                'description' => 'Nước uống, nước trái cây, soda, cà phê và các loại đồ uống khác, mát lạnh và ngon miệng.',
+                'description' => 'Các loại đồ uống',
                 'parent_id' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -62,4 +82,3 @@ class CategorySeeder extends Seeder
         ]);
     }
 }
-

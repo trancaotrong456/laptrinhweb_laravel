@@ -1,235 +1,246 @@
-@extends('layout')
+@extends('layouts.admin')
+
+@section('title', 'Quản lý danh mục - TTP Admin')
+
+@push('styles')
+<style>
+/* ── SEARCH BAR ─────────────────────────────────────────── */
+.search-bar-wrapper {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.search-input {
+    flex: 1; height: 44px; padding: 0 18px; min-width: 250px;
+    border: 1.5px solid #e2e8f0; border-radius: 10px;
+    font-size: 14px; font-family: inherit; color: #1e293b;
+    background: #fff; outline: none; transition: all .2s;
+}
+.search-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.search-btn {
+    height: 44px; padding: 0 22px;
+    background: #2563eb; color: #fff; border: none;
+    border-radius: 10px; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    transition: all .2s; font-family: inherit;
+}
+.search-btn:hover { background: #1d4ed8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.3); }
+
+/* ── TABLE HEADER ──────────────────────────────────────── */
+.cat-table-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.cat-col-id     { width: 50px; flex-shrink: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+.cat-col-name   { flex: 1; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+.cat-col-desc   { flex: 1.5; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+.cat-col-count  { width: 120px; flex-shrink: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+.cat-col-action { width: 120px; flex-shrink: 0; text-align: right; font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; }
+
+/* ── CAT ROW ──────────────────────────────────────────── */
+.cat-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f8fafc;
+    transition: background .15s;
+}
+.cat-row:last-child { border-bottom: none; }
+.cat-row:hover { background: #f8faff; }
+
+.cat-row-id { width: 50px; flex-shrink: 0; font-size: 13.5px; font-weight: 600; color: #94a3b8; }
+.cat-row-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; color: #1e293b; }
+.cat-row-desc { flex: 1.5; min-width: 0; font-size: 13px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cat-row-count { width: 120px; flex-shrink: 0; }
+.cat-row-action { width: 120px; flex-shrink: 0; display: flex; align-items: center; gap: 7px; justify-content: flex-end; }
+
+/* ── EMPTY ─────────────────────────────────────────────── */
+.empty-box {
+    text-align: center; padding: 60px 20px; color: #94a3b8;
+}
+.empty-box i { font-size: 48px; margin-bottom: 14px; display: block; opacity: .5; }
+.empty-box p { font-size: 14px; }
+</style>
+@endpush
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="card-title mb-0">
-                            <i class="fas fa-tags me-2"></i>Quản lý danh mục
-                        </h4>
-                        @if(auth()->check() && auth()->user()->role === 1)
-                        <a href="{{ route('categories.create') }}" class="btn btn-success">
-                            <i class="fas fa-plus me-1"></i>Thêm danh mục mới
-                        </a>
-                        @endif
-                    </div>
-                </div>
 
-                <div class="card-body">
-                    @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    @endif
+{{-- PAGE HEADER --}}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <i class="fas fa-tags" style="color:#2563eb;font-size:20px;"></i>
+            Quản lý danh mục
+        </h1>
+        <div class="page-sub">Tổng cộng: <strong>{{ $categories->total() ?? 0 }}</strong> danh mục</div>
+    </div>
+    @if(auth()->check() && auth()->user()->role === 1)
+    <a href="{{ route('categories.create') }}" class="btn-primary-admin">
+        <i class="fas fa-plus"></i> Thêm danh mục mới
+    </a>
+    @endif
+</div>
 
-                    @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    @endif
+{{-- SUCCESS / ERRORS --}}
+@if(session('success'))
+<div class="admin-alert success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
+@endif
+@if($errors->any())
+<div class="admin-alert error">
+    <i class="fas fa-exclamation-triangle"></i>
+    <ul style="margin:0;padding-left:20px;">
+        @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
 
-                    <!-- Form tìm kiếm và sắp xếp -->
-                    <div class="row mb-4">
-                        <div class="col-md-5">
-                            <form method="GET" action="{{ route('categories.index') }}" class="d-flex gap-2"
-                                id="searchForm">
-                                <div class="position-relative flex-grow-1">
-                                    <input type="text" name="search" class="form-control" id="searchInput"
-                                        placeholder="Tìm kiếm theo tên hoặc mô tả..." value="{{ $search ?? '' }}"
-                                        list="searchSuggestions" autocomplete="off">
-                                    <datalist id="searchSuggestions"></datalist>
-                                </div>
-                                <input type="hidden" name="sort" value="{{ $sort ?? 'newest' }}">
-                                <button type="submit" class="btn btn-outline-success">
-                                    <i class="fas fa-search"></i>
-                                </button>
-                                @if($search)
-                                <a href="{{ route('categories.index') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times"></i>
-                                </a>
-                                @endif
-                            </form>
-                        </div>
-                        <div class="col-md-2">
-                            <form method="GET" action="{{ route('categories.index') }}" class="d-flex gap-2">
-                                <input type="hidden" name="search" value="{{ $search ?? '' }}">
-                                <select name="sort" class="form-select" onchange="this.form.submit()">
-                                    <option value="newest" {{ ($sort ?? 'newest') === 'newest' ? 'selected' : '' }}>
-                                        Mới nhất
-                                    </option>
-                                    <option value="oldest" {{ ($sort ?? 'newest') === 'oldest' ? 'selected' : '' }}>
-                                        Cũ nhất
-                                    </option>
-                                    <option value="quantity" {{ ($sort ?? 'newest') === 'quantity' ? 'selected' : '' }}>
-                                        Số lượng sản phẩm
-                                    </option>
-                                </select>
-                            </form>
-                        </div>
-                        <div class="col-md-3 d-flex gap-2 justify-content-end align-items-center">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="hideOutOfStock">
-                                <label class="form-check-label text-secondary" for="hideOutOfStock">
-                                    Ẩn danh mục hết hàng
-                                </label>
-                            </div>
-                            <small class="text-muted" style="white-space: nowrap;">
-                                Tổng: <strong>{{ $categories->total() }}</strong>
-                            </small>
-                        </div>
-                    </div>
-
-                    @if($categories->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover table-striped">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th width="5%">#</th>
-                                    <th width="25%">Tên danh mục</th>
-                                    <th width="35%">Mô tả</th>
-                                    <th width="15%">Số sản phẩm</th>
-                                    <th width="20%">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($categories as $category)
-                                <tr class="category-row"
-                                    data-out-of-stock="{{ $category->products_count == 0 ? '1' : '0' }}">
-                                    <td>{{ $categories->firstItem() + $loop->index }}</td>
-                                    <td>
-                                        <strong>{{ $category->name }}</strong>
-                                    </td>
-                                    <td>
-                                        {{ $category->description ? Str::limit($category->description, 50) : 'Chưa có mô tả' }}
-                                    </td>
-                                    <td>
-                                        @if($category->products_count > 0)
-                                        <span class="badge bg-success">
-                                            {{ $category->products_count }} sản phẩm
-                                        </span>
-                                        @else
-                                        <span class="badge bg-danger">
-                                            <i class="fas fa-times-circle me-1"></i>Hết hàng
-                                        </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('categories.show', $category) }}"
-                                                class="btn btn-sm btn-outline-info" title="Xem chi tiết">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @if(auth()->check() && auth()->user()->role === 1)
-                                            <a href="{{ route('categories.edit', $category) }}"
-                                                class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('categories.destroy', $category) }}" method="POST"
-                                                class="d-inline"
-                                                onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"
-                                                    {{ $category->products_count > 0 ? 'disabled' : '' }}>
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                @if($hasParentColumn)
-                                @foreach($category->children as $child)
-                                <tr class="category-row"
-                                    data-out-of-stock="{{ $child->products_count == 0 ? '1' : '0' }}">
-                                    <td></td>
-                                    <td>
-                                        <span class="text-muted">&nbsp;&nbsp;&nbsp;└─</span>
-                                        {{ $child->name }}
-                                    </td>
-                                    <td>
-                                        {{ $child->description ? Str::limit($child->description, 50) : 'Chưa có mô tả' }}
-                                    </td>
-                                    <td>
-                                        @if($child->products_count > 0)
-                                        <span class="badge bg-success">
-                                            {{ $child->products_count }} sản phẩm
-                                        </span>
-                                        @else
-                                        <span class="badge bg-danger">
-                                            <i class="fas fa-times-circle me-1"></i>Hết hàng
-                                        </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('categories.show', $child) }}"
-                                                class="btn btn-sm btn-outline-info" title="Xem chi tiết">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @if(auth()->check() && auth()->user()->role === 1)
-                                            <a href="{{ route('categories.edit', $child) }}"
-                                                class="btn btn-sm btn-outline-warning" title="Chỉnh sửa">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('categories.destroy', $child) }}" method="POST"
-                                                class="d-inline"
-                                                onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"
-                                                    {{ $child->products_count > 0 ? 'disabled' : '' }}>
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                                @endif
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Phân trang -->
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $categories->links() }}
-                    </div>
-                    @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Không tìm thấy danh mục nào</h5>
-                        @if($search)
-                        <p class="text-muted">Không có kết quả cho từ khóa: <strong>"{{ $search }}"</strong></p>
-                        <a href="{{ route('categories.index') }}" class="btn btn-success">
-                            <i class="fas fa-arrow-left me-1"></i>Xem tất cả danh mục
-                        </a>
-                        @elseif(auth()->check() && auth()->user()->role === 1)
-                        <a href="{{ route('categories.create') }}" class="btn btn-success">
-                            <i class="fas fa-plus me-1"></i>Thêm danh mục đầu tiên
-                        </a>
-                        @endif
-                    </div>
-                    @endif
-                </div>
-            </div>
-        </div>
+{{-- SEARCH & FILTER --}}
+<div class="search-bar-wrapper">
+    <form method="GET" action="{{ route('categories.index') }}" style="display:flex;gap:12px;flex:1;" id="searchForm">
+        <input type="text" name="search" class="search-input" id="searchInput"
+            placeholder="Tìm kiếm theo tên hoặc mô tả..." value="{{ $search ?? '' }}"
+            list="searchSuggestions" autocomplete="off">
+        <datalist id="searchSuggestions"></datalist>
+        <input type="hidden" name="sort" value="{{ $sort ?? 'newest' }}">
+        <button type="submit" class="search-btn"><i class="fas fa-search"></i> Tìm kiếm</button>
+        @if($search)
+        <a href="{{ route('categories.index') }}" class="btn-outline-admin"><i class="fas fa-times"></i> Xóa</a>
+        @endif
+    </form>
+    <div style="display:flex;gap:12px;align-items:center;">
+        <form method="GET" action="{{ route('categories.index') }}" style="display:flex;">
+            <input type="hidden" name="search" value="{{ $search ?? '' }}">
+            <select name="sort" class="search-input" style="min-width:auto;width:auto;height:44px;font-weight:600;color:#475569;border-color:#e2e8f0;cursor:pointer;" onchange="this.form.submit()">
+                <option value="newest" {{ ($sort ?? 'newest') === 'newest' ? 'selected' : '' }}>Mới nhất</option>
+                <option value="oldest" {{ ($sort ?? 'newest') === 'oldest' ? 'selected' : '' }}>Cũ nhất</option>
+                <option value="quantity" {{ ($sort ?? 'newest') === 'quantity' ? 'selected' : '' }}>Số lượng sản phẩm</option>
+            </select>
+        </form>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#64748b;cursor:pointer;font-weight:500;">
+            <input type="checkbox" id="hideOutOfStock" style="width:16px;height:16px;accent-color:#2563eb;"> Ẩn mục hết hàng
+        </label>
     </div>
 </div>
 
+{{-- TABLE --}}
+<div class="admin-card" style="overflow:hidden;">
+    {{-- Header --}}
+    <div class="cat-table-header">
+        <div class="cat-col-id">#</div>
+        <div class="cat-col-name">Tên danh mục</div>
+        <div class="cat-col-desc">Mô tả</div>
+        <div class="cat-col-count">Số sản phẩm</div>
+        <div class="cat-col-action">Thao tác</div>
+    </div>
+
+    {{-- Rows --}}
+    @if($categories->count() > 0)
+    @foreach($categories as $category)
+    <div class="cat-row category-row" data-out-of-stock="{{ $category->products_count == 0 ? '1' : '0' }}">
+        <div class="cat-row-id">{{ $categories->firstItem() + $loop->index }}</div>
+        <div class="cat-row-name">
+            {{ $category->name }}
+        </div>
+        <div class="cat-row-desc">
+            {{ $category->description ? $category->description : '—' }}
+        </div>
+        <div class="cat-row-count">
+            @if($category->products_count > 0)
+            <span class="badge-status active">
+                {{ $category->products_count }} sản phẩm
+            </span>
+            @else
+            <span class="badge-status error">
+                <i class="fas fa-times-circle" style="font-size:10px;"></i> Hết hàng
+            </span>
+            @endif
+        </div>
+        <div class="cat-row-action">
+            <a href="{{ route('categories.show', $category) }}" class="icon-btn view" title="Xem chi tiết">
+                <i class="fas fa-eye"></i>
+            </a>
+            @if(auth()->check() && auth()->user()->role === 1)
+            <a href="{{ route('categories.edit', $category) }}" class="icon-btn edit" title="Chỉnh sửa">
+                <i class="fas fa-pen"></i>
+            </a>
+            <form action="{{ route('categories.destroy', $category) }}" method="POST"
+                onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="icon-btn delete" title="Xóa" {{ $category->products_count > 0 ? 'disabled' : '' }} style="{{ $category->products_count > 0 ? 'opacity:0.3;cursor:not-allowed;' : '' }}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </form>
+            @endif
+        </div>
+    </div>
+
+        {{-- Child Categories --}}
+        @if(isset($hasParentColumn) && $hasParentColumn && $category->children)
+        @foreach($category->children as $child)
+        <div class="cat-row category-row" data-out-of-stock="{{ $child->products_count == 0 ? '1' : '0' }}" style="background:#fcfcfc;">
+            <div class="cat-row-id"></div>
+            <div class="cat-row-name" style="padding-left:16px;">
+                <span style="color:#cbd5e1;margin-right:8px;">└─</span> {{ $child->name }}
+            </div>
+            <div class="cat-row-desc">
+                {{ $child->description ? $child->description : '—' }}
+            </div>
+            <div class="cat-row-count">
+                @if($child->products_count > 0)
+                <span class="badge-status active">
+                    {{ $child->products_count }} sản phẩm
+                </span>
+                @else
+                <span class="badge-status error">
+                    <i class="fas fa-times-circle" style="font-size:10px;"></i> Hết hàng
+                </span>
+                @endif
+            </div>
+            <div class="cat-row-action">
+                <a href="{{ route('categories.show', $child) }}" class="icon-btn view" title="Xem chi tiết">
+                    <i class="fas fa-eye"></i>
+                </a>
+                @if(auth()->check() && auth()->user()->role === 1)
+                <a href="{{ route('categories.edit', $child) }}" class="icon-btn edit" title="Chỉnh sửa">
+                    <i class="fas fa-pen"></i>
+                </a>
+                <form action="{{ route('categories.destroy', $child) }}" method="POST"
+                    onsubmit="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="icon-btn delete" title="Xóa" {{ $child->products_count > 0 ? 'disabled' : '' }} style="{{ $child->products_count > 0 ? 'opacity:0.3;cursor:not-allowed;' : '' }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>
+                @endif
+            </div>
+        </div>
+        @endforeach
+        @endif
+    @endforeach
+    @else
+    <div class="empty-box">
+        <i class="fas fa-tags"></i>
+        <p>Không tìm thấy danh mục nào</p>
+        @if(auth()->check() && auth()->user()->role === 1)
+        <a href="{{ route('categories.create') }}" class="btn-primary-admin" style="display:inline-flex;margin-top:10px;">
+            <i class="fas fa-plus"></i> Thêm danh mục
+        </a>
+        @endif
+    </div>
+    @endif
+</div>
+
+{{-- PAGINATION --}}
+@if(isset($categories) && $categories->hasPages())
+<div style="margin-top:18px;display:flex;justify-content:center;">
+    {{ $categories->links('pagination::bootstrap-5') }}
+</div>
+@endif
+
+@endsection
+
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
@@ -238,53 +249,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ========== Gợi ý tìm kiếm ==========
     let searchTimeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        const query = this.value.trim();
+    if(searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            searchDatalist.innerHTML = '';
+            if (query.length < 1) return;
 
-        // Xóa các suggestion cũ
-        searchDatalist.innerHTML = '';
-
-        if (query.length < 1) {
-            return;
-        }
-
-        searchTimeout = setTimeout(function() {
-            fetch(`{{ route('categories.searchSuggestions') }}?q=${encodeURIComponent(query)}`)
-                .then(response => response.json())
-                .then(data => {
-                    searchDatalist.innerHTML = '';
-                    data.forEach(suggestion => {
-                        const option = document.createElement('option');
-                        option.value = suggestion.name;
-                        option.label = suggestion.name + (suggestion.description ?
-                            ' - ' + suggestion.description : '');
-                        searchDatalist.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Lỗi khi lấy gợi ý:', error));
-        }, 300); // Delay 300ms để tránh nhiều request
-    });
+            searchTimeout = setTimeout(function() {
+                fetch(`{{ route('categories.searchSuggestions') }}?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        searchDatalist.innerHTML = '';
+                        data.forEach(suggestion => {
+                            const option = document.createElement('option');
+                            option.value = suggestion.name;
+                            option.label = suggestion.name + (suggestion.description ? ' - ' + suggestion.description : '');
+                            searchDatalist.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Lỗi khi lấy gợi ý:', error));
+            }, 300);
+        });
+    }
 
     // ========== Ẩn/hiện danh mục hết hàng ==========
-    hideOutOfStockCheckbox.addEventListener('change', function() {
-        const categoryRows = document.querySelectorAll('.category-row');
-
-        categoryRows.forEach(row => {
-            const isOutOfStock = row.dataset.outOfStock === '1';
-            row.style.display = this.checked && isOutOfStock ? 'none' : '';
+    if(hideOutOfStockCheckbox) {
+        hideOutOfStockCheckbox.addEventListener('change', function() {
+            const categoryRows = document.querySelectorAll('.category-row');
+            categoryRows.forEach(row => {
+                const isOutOfStock = row.dataset.outOfStock === '1';
+                row.style.display = this.checked && isOutOfStock ? 'none' : 'flex';
+            });
+            localStorage.setItem('hideOutOfStock', this.checked);
         });
 
-        // Lưu trạng thái checkbox vào localStorage
-        localStorage.setItem('hideOutOfStock', this.checked);
-    });
-
-    // Khôi phục trạng thái checkbox từ localStorage
-    const savedState = localStorage.getItem('hideOutOfStock') === 'true';
-    if (savedState) {
-        hideOutOfStockCheckbox.checked = true;
-        hideOutOfStockCheckbox.dispatchEvent(new Event('change'));
+        const savedState = localStorage.getItem('hideOutOfStock') === 'true';
+        if (savedState) {
+            hideOutOfStockCheckbox.checked = true;
+            hideOutOfStockCheckbox.dispatchEvent(new Event('change'));
+        }
     }
 });
 </script>
-@endsection
+@endpush
