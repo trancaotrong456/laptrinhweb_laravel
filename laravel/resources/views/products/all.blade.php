@@ -31,44 +31,94 @@
     <div class="row g-4 mt-0">
         {{-- ─── SIDEBAR FILTER ─── --}}
         <div class="col-lg-3">
-            <div class="filter-panel">
-                <h5><i class="fas fa-sliders-h me-2" style="color:#2e7d32;"></i>Phân loại</h5>
-                <div class="filter-label"><input type="checkbox" checked> Hữu cơ (Organic)</div>
-                <div class="filter-label"><input type="checkbox" checked> Nhập khẩu</div>
-                <div class="filter-label"><input type="checkbox"> Nội địa (VietGAP)</div>
-
-                <div class="filter-divider"></div>
-                <h5>Khoảng giá (VNĐ)</h5>
-                <div class="price-range">
-                    <input type="range" min="0" max="1000000" value="1000000" id="priceRange"
-                           oninput="document.getElementById('priceVal').textContent=Number(this.value).toLocaleString('vi-VN')">
-                    <div class="price-vals">
-                        <span>0đ</span>
-                        <span id="priceVal">1.000.000đ</span>
+            <form id="filterForm" method="GET" action="{{ route('products.all') }}">
+                <div class="filter-panel">
+            
+                    <h5>
+                        <i class="fas fa-sliders-h me-2" style="color:#2e7d32;"></i>
+                        Bộ lọc sản phẩm
+                    </h5>
+            
+                    {{-- Tìm kiếm --}}
+                    <div class="mb-3">
+                        <label class="form-label">Tên sản phẩm</label>
+                        <input type="text"
+                            name="keyword"
+                            value="{{ request('keyword') }}"
+                            class="form-control"
+                            placeholder="Nhập tên sản phẩm...">
                     </div>
-                </div>
-
-                <div class="filter-divider"></div>
-                <h5>Thương hiệu</h5>
-                <div class="filter-label"><input type="checkbox"> Dalat Gap</div>
-                <div class="filter-label"><input type="checkbox"> VinEco</div>
-                <div class="filter-label"><input type="checkbox"> Zirapit</div>
-
-                <div class="filter-divider"></div>
-                <h5>Đánh giá</h5>
-                <div class="rating-filter">
-                    @for($r=5;$r>=4;$r--)
-                    <div class="rf-row">
-                        <div class="rf-stars">
-                            @for($s=1;$s<=5;$s++)
-                            <i class="{{ $s<=$r ? 'fas' : 'far' }} fa-star"></i>
-                            @endfor
-                        </div>
-                        <span style="font-size:12.5px;margin-left:4px;color:#757575;">Từ {{ $r }}.0 sao</span>
+            
+                    <div class="filter-divider"></div>
+            
+                    {{-- Danh mục --}}
+                    <h5>Danh mục</h5>
+            
+                    @foreach($categories as $category)
+                    <div class="filter-label">
+                        <input
+                            type="checkbox"
+                            name="category_id[]"
+                            value="{{ $category->id }}"
+                            {{ in_array($category->id, request('category_id', [])) ? 'checked' : '' }}
+                        >
+                        {{ $category->name }}
                     </div>
-                    @endfor
+                    @endforeach
+            
+                    <div class="filter-divider"></div>
+            
+                    {{-- Giá --}}
+                    <h5>Khoảng giá</h5>
+            
+                    <div class="mb-2">
+                        <input
+                            type="number"
+                            name="min_price"
+                            class="form-control"
+                            placeholder="Giá từ"
+                            value="{{ request('min_price') }}">
+                    </div>
+            
+                    <div class="mb-3">
+                        <input
+                            type="number"
+                            name="max_price"
+                            class="form-control"
+                            placeholder="Giá đến"
+                            value="{{ request('max_price') }}">
+                    </div>
+            
+                    <div class="filter-divider"></div>
+            
+                    {{-- Còn hàng --}}
+                    <h5>Tình trạng</h5>
+            
+                    <div class="filter-label">
+                        <input
+                            type="checkbox"
+                            name="in_stock"
+                            value="1"
+                            {{ request('in_stock') ? 'checked' : '' }}
+                        >
+                        Chỉ hiển thị sản phẩm còn hàng
+                    </div>
+            
+                    <div class="filter-divider"></div>    
+                    <div class="mt-4 d-grid gap-2">
+                        <button class="btn-green">
+                            <i class="fas fa-search"></i>
+                            Áp dụng bộ lọc
+                        </button>
+            
+                        <a href="{{ route('products.all') }}"
+                            class="btn-green-outline text-center">
+                            Xóa bộ lọc
+                        </a>
+                    </div>
+            
                 </div>
-            </div>
+            </form>
         </div>
 
         {{-- ─── PRODUCT GRID ─── --}}
@@ -80,12 +130,27 @@
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <span style="font-size:13px;color:#9e9e9e;">Sắp xếp theo:</span>
-                    <select style="height:36px;border:1.5px solid #e0e0e0;border-radius:8px;padding:0 12px;font-size:13px;
+                    <select 
+                    name="sort"
+                    onchange="this.form.submit()"
+                    form="filterForm"
+                    style="height:36px;border:1.5px solid #e0e0e0;border-radius:8px;padding:0 12px;font-size:13px;
                                    font-family:inherit;outline:none;background:white;color:#212121;">
-                        <option>Mới nhất</option>
-                        <option>Giá tăng dần</option>
-                        <option>Giá giảm dần</option>
-                        <option>Đánh giá cao</option>
+                        <option value="">Mặc định</option>
+                        <option value="latest"
+                        {{ request('sort')=='latest' ? 'selected' : '' }}>
+                        Mới nhất
+                        </option>
+            
+                        <option value="price_asc"
+                            {{ request('sort')=='price_asc' ? 'selected' : '' }}>
+                            Giá tăng dần
+                        </option>
+            
+                        <option value="price_desc"
+                            {{ request('sort')=='price_desc' ? 'selected' : '' }}>
+                            Giá giảm dần
+                        </option>
                     </select>
                 </div>
             </div>
@@ -96,7 +161,7 @@
                     <div class="product-card">
                         <a href="{{ route('products.detail', $product) }}" class="pc-img-wrap d-block">
                             @if($product->image)
-                                <img src="{{ asset('images/' . $product->image) }}" alt="{{ $product->name }}"
+                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
                                      onerror="this.parentElement.innerHTML='<div class=\'no-img\'><i class=\'fas fa-image\'></i></div>'">
                             @else
                                 <div class="no-img"><i class="fas fa-image"></i></div>

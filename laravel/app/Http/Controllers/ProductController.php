@@ -3,160 +3,254 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Models\Category;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\File;
 
 class ProductController extends Controller
 {
     /**
-     * Hiển thị danh sách sản phẩm (Admin)
+     * Display a listing of the resource.
      */
     public function index(Request $request)
     {
+        $products = Product::with('category');
+
+        // tìm kiếm theo tên sản phẩm
+        $products = $this->searchByName($products, $request);
+
+        // lọc category theo id
+        $products = $this->filterByCategory($products, $request);
+
+        // sắp xếp
+        $products = $this->sortProducts($products, $request);
+
+        // phân trang
+        $products = $this->paginateProducts($products);
+
         $categories = Category::all();
-        $keyword = $request->input('keyword', '');
-        
-        $query = Product::with('category');
-        
-        if ($keyword) {
-            $query->where('name', 'like', '%' . $keyword . '%');
+
+        return view('products.admin.products.index', [
+            'products' => $products,
+            'keyword' => $request->keyword,
+            'categories' => $categories,
+            'category_id' => $request->category_id
+        ]);
+    }
+
+    // Tìm kiếm theo tên
+    private function searchByName($products, $request)
+    {
+        if ($request->keyword) {
+            $products->where(
+                'name',
+                'like',
+                '%' . $request->keyword . '%'
+            );
         }
 
-        if ($request->filled('category')) {
-            $query->whereHas('category', function($q) use ($request) {
-                $q->where('name', $request->category);
-            });
-        }
+        return $products;
+    }
 
-        if ($request->filled('sort')) {
-            if ($request->sort === 'price_asc') {
-                $query->orderBy('price', 'asc');
-            } elseif ($request->sort === 'price_desc') {
-                $query->orderBy('price', 'desc');
-            } else {
-                $query->orderByDesc('id');
-            }
-        } else {
-            $query->orderByDesc('id');
+    // Lọc theo category
+    private function filterByCategory($products, $request)
+    {
+        if ($request->filled('category_id')) {
+            $products->where('category_id', $request->category_id);
         }
+        return $products;
+    }
 
-        $products = $query->paginate(10);
-        
-        return view('products.index', compact('products', 'categories', 'keyword'));
+    // Phân trang
+    private function paginateProducts($products)
+    {
+        return $products->paginate(5)->appends(request()->query());
     }
 
     /**
-     * Hiển thị form thêm sản phẩm
+     * Show form create
      */
     public function create()
     {
         $categories = Category::all();
-        return view('products.create', compact('categories'));
+
+        return view('products.admin.products.create', compact('categories'));
     }
 
     /**
-     * Xử lý lưu sản phẩm mới
+     * Store product
      */
     public function store(Request $request)
     {
+        // Validate
         $request->validate([
-            'name'        => 'required|string|max:255',
-            'price'       => 'required|numeric|min:0',
-            'quantity'    => 'required|numeric|min:0',
+            'name' => 'required|max:255|min:3',
+            'price' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:1',
             'category_id' => 'required|exists:categories,id',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'description' => 'nullable|string',
+
+            // validate image
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'name.min' => 'Tên không hợp lệ.',
+
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+            'price.min' => 'Giá không hợp lệ.',
+
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.numeric' => 'Số lượng phải là số.',
+            'quantity.min' => 'Số lượng không hợp lệ.',
+
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'category_id.exists' => 'Danh mục không tồn tại.',
+
+            'image.image' => 'File upload phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpg, jpeg, png hoặc webp.',
+            'image.max' => 'Kích thước ảnh tối đa 2MB.',
         ]);
 
-        $data = $request->except('image');
+        $imageName = null;
 
+        // upload ảnh
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            // Lưu vào thư mục public/images
-            $image->move(public_path('images'), $imageName);
-            $data['image'] = $imageName;
+
+            $imageName = $request
+                ->file('image')
+                ->store('products', 'public');
         }
 
-        Product::create($data);
+        Product::create([
+            'name' => $request->name,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'image' => $imageName,
+            'category_id' => $request->category_id,
+            'status' => $request->quantity > 0
+                ? 'Còn hàng'
+                : 'Hết hàng'
+        ]);
 
-        return redirect()->route('products.index')
-                         ->with('success', 'Thêm sản phẩm thành công!');
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Thêm sản phẩm thành công');
     }
 
     /**
-     * Hiển thị form chỉnh sửa sản phẩm
+     * Show detail
      */
-    public function edit(Product $product)
+    public function show($id)
     {
+        $product = Product::with('category')->findOrFail($id);
+
+        return view('products.admin.products.show', compact('product'));
+    }
+
+    /**
+     * Edit form
+     */
+    public function edit($id)
+    {
+        $product = Product::findOrFail($id);
         $categories = Category::all();
-        return view('products.edit', compact('product', 'categories'));
+        return view('products.admin.products.edit', compact('product', 'categories'));
     }
 
     /**
-     * Xử lý cập nhật sản phẩm
+     * Update product
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, $id)
     {
+        $product = Product::findOrFail($id);
         $request->validate([
-            'name'        => 'required|string|max:255',
-            'price'       => 'required|numeric|min:0',
-            'quantity'    => 'required|numeric|min:0',
+            'name' => 'required|max:255|min:3',
+            'price' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:1',
             'category_id' => 'required|exists:categories,id',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'description' => 'nullable|string',
+    
+            // validate image
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'name.min' => 'Tên không hợp lệ.',
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+    
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.numeric' => 'Số lượng phải là số.',
+    
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+    
+            'image.image' => 'File upload phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpg, jpeg, png hoặc webp.',
+            'image.max' => 'Kích thước ảnh tối đa 2MB.',
         ]);
-
-        $data = $request->except('image');
+        $imageName = $product->image;
 
         if ($request->hasFile('image')) {
-            // Xóa ảnh cũ nếu có
+
+            // xóa ảnh cũ
             if ($product->image) {
-                if (File::exists(public_path('images/' . $product->image))) {
-                    File::delete(public_path('images/' . $product->image));
-                } elseif (Storage::disk('public')->exists($product->image)) {
-                    Storage::disk('public')->delete($product->image);
-                }
+                Storage::disk('public')
+                    ->delete($product->image);
             }
 
-            $image = $request->file('image');
-            $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('images'), $imageName);
-            $data['image'] = $imageName;
+            $imageName = $request
+                ->file('image')
+                ->store('products', 'public');
         }
 
-        $product->update($data);
+        $product->update([
+            'name' => $request->name,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'image' => $imageName,
+            'category_id' => $request->category_id,
+            'status' => $request->quantity > 0
+                ? 'Còn hàng'
+                : 'Hết hàng'
+        ]);
 
-        return redirect()->route('products.index')
-                         ->with('success', 'Cập nhật sản phẩm thành công!');
+        return redirect()->route('products.index')->with('Cập nhật sản phẩm thành công!');
     }
 
     /**
-     * Hiển thị chi tiết sản phẩm (Admin)
+     * Delete product
      */
-    public function show(Product $product)
+    public function destroy($id)
     {
-        return view('products.show', compact('product'));
-    }
+        $product = Product::findOrFail($id);
 
-    /**
-     * Xử lý xóa sản phẩm
-     */
-    public function destroy(Product $product)
-    {
+        // xóa ảnh
         if ($product->image) {
-            if (File::exists(public_path('images/' . $product->image))) {
-                File::delete(public_path('images/' . $product->image));
-            } elseif (Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
-            }
+            Storage::disk('public')
+                ->delete($product->image);
         }
-        
+
         $product->delete();
-        
-        return redirect()->route('products.index')
-                         ->with('success', 'Đã xóa sản phẩm!');
+
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Xóa sản phẩm thành công');
+    }
+
+    // Sắp xếp
+    public function sortProducts($products, $request)
+    {
+        switch ($request->sort){
+            case 'price_asc':
+                $products->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $products->orderBy('price', 'desc');
+                break;
+            default :
+                $products->latest();
+                break;
+            
+        }
+
+        return $products;
     }
 }
