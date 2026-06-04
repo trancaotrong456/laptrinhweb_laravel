@@ -236,12 +236,14 @@
             <input type="text" name="keyword" class="form-control-st" placeholder="Nhập tên sản phẩm..."
                 value="{{ $keyword ?? '' }}">
 
-            <select name="category" class="form-control-st">
+            <select name="category_id" class="form-control-st">
                 <option value="">Tất cả danh mục</option>
+                
                 @foreach ($categories as $category)
-                <option value="{{ $category->name }}" {{ request('category') === $category->name ? 'selected' : '' }}>
-                    {{ $category->name }}
-                </option>
+                    <option value="{{ $category->id }}"
+                            {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                    </option>
                 @endforeach
             </select>
 
@@ -284,12 +286,9 @@
                 <tbody>
                     @forelse($products as $product)
                     @php
-                    $imageUrl = null;
-                    if ($product->image) {
-                    $imageUrl = str_contains($product->image, '/')
-                    ? asset('storage/' . $product->image)
-                    : asset('images/' . $product->image);
-                    }
+                        $imageUrl = $product->image
+                        ? asset('storage/' . $product->image)
+                        : null;
                     @endphp
                     <tr>
                         <td class="product-name-cell">
@@ -316,7 +315,7 @@
                             @endif
                         </td>
                         <td>
-                            @if((int) $product->quantity > 0)
+                            @if($product->status == 'Còn hàng')
                             <span class="stock-badge in">
                                 <i class="fas fa-check-circle"></i>
                                 Còn hàng

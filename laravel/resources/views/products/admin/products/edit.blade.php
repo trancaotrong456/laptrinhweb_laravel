@@ -240,7 +240,7 @@
             </h2>
         </div>
 
-        <form method="POST" enctype="multipart/form-data" action="{{ route('products.update', $product->id) }}">
+        <form method="POST" enctype="multipart/form-data" action="{{ route('products.update', $product->id) }}" novalidate>
             @csrf
             @method('PUT')
 
@@ -248,8 +248,13 @@
 
                 <div class="form-group-st">
                     <label><i class="fas fa-tag"></i> Tên sản phẩm <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control-st" placeholder="Nhập tên sản phẩm chính xác..."
+                    <input type="text" name="name" class="form-control-st @error('name') is-invalid @enderror" placeholder="Nhập tên sản phẩm chính xác..."
                         value="{{ old('name', $product->name) }}" required>
+                        @error('name')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     <span class="form-help-text">Tên sản phẩm nên bao gồm loại sản phẩm và đặc tính riêng thương
                         hiệu.</span>
                 </div>
@@ -257,23 +262,33 @@
                 <div class="form-grid-2">
                     <div class="form-group-st">
                         <label><i class="fas fa-coins"></i> Giá bán (đ) <span class="text-danger">*</span></label>
-                        <input type="number" name="price" class="form-control-st" placeholder="Ví dụ: 150000"
+                        <input type="number" name="price" class="form-control-st @error('price') is-invalid @enderror" placeholder="Ví dụ: 150000"
                             value="{{ old('price', (int)$product->price) }}" required>
+                            @error('price')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                            @enderror
                         <span class="form-help-text">Nhập số nguyên dương, hệ thống tự động định dạng hiển thị tiền
                             tệ.</span>
                     </div>
 
                     <div class="form-group-st">
                         <label><i class="fas fa-cubes"></i> Số lượng kho <span class="text-danger">*</span></label>
-                        <input type="number" name="quantity" class="form-control-st" placeholder="Ví dụ: 50"
+                        <input type="number" name="quantity" class="form-control-st @error('quantity') is-invalid @enderror" placeholder="Ví dụ: 50"
                             value="{{ old('quantity', $product->quantity) }}" required>
+                            @error('quantity')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                            @enderror
                         <span class="form-help-text">Số lượng sản phẩm hiện tại còn khả dụng trong kho.</span>
                     </div>
                 </div>
 
                 <div class="form-group-st">
                     <label><i class="fas fa-list"></i> Danh mục sản phẩm <span class="text-danger">*</span></label>
-                    <select name="category_id" class="form-control-st" required>
+                    <select name="category_id" class="form-control-st @error('category_id') is-invalid @enderror" required>
                         <option value="">-- Chọn danh mục --</option>
                         @foreach ($categories as $cate)
                         <option value="{{ $cate->id }}" {{ old('category_id', $product->category_id) == $cate->id ? 'selected' : '' }}>
@@ -281,12 +296,22 @@
                         </option>
                         @endforeach
                     </select>
+                    @error('category_id')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
                     <span class="form-help-text">Chọn danh mục thích hợp cho sản phẩm này.</span>
                 </div>
 
                 <div class="form-group-st">
                     <label><i class="fas fa-align-left"></i> Mô tả sản phẩm</label>
-                    <textarea name="description" class="form-control-st" style="height: 120px; resize: vertical;" placeholder="Nhập mô tả chi tiết về sản phẩm...">{{ old('description', $product->description) }}</textarea>
+                    <textarea name="description" class="form-control-st @error('description') is-invalid @enderror" style="height: 120px; resize: vertical;" placeholder="Nhập mô tả chi tiết về sản phẩm...">{{ old('description', $product->description) }}</textarea>
+                    @error('category_id')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
+                    @enderror
                     <span class="form-help-text">Mô tả giúp khách hàng hiểu rõ hơn về sản phẩm.</span>
                 </div>
 
@@ -295,28 +320,41 @@
 
                     <div class="image-management-zone">
                         @if($product->image)
-                        @php
-                        $imageUrl = str_contains($product->image, '/')
-                        ? asset('storage/' . $product->image)
-                        : asset('images/' . $product->image);
-                        @endphp
-                        <div class="preview-img-container">
-                            <div class="preview-img-wrapper">
-                                <img src="{{ $imageUrl }}" alt="Ảnh hiện tại"
-                                    onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;80&quot; height=&quot;80&quot;><rect fill=&quot;%23f5f5f5&quot; width=&quot;80&quot; height=&quot;80&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; dominant-baseline=&quot;middle&quot; text-anchor=&quot;middle&quot; fill=&quot;%23999&quot; font-size=&quot;12&quot;>Lỗi ảnh</text></svg>'">
-                            </div>
-                            <div>
-                                <div class="fw-bold text-dark" style="font-size: 13.5px;">Ảnh hiện tại của sản phẩm
+
+                            <div class="preview-img-container">
+                                <div class="preview-img-wrapper">
+
+                                    @if(file_exists(public_path('storage/' . $product->image)))
+                                        <img src="{{ asset('storage/' . $product->image) }}"
+                                            alt="{{ $product->name }}">
+                                    @else
+                                        <img src="{{ asset('images/' . $product->image) }}"
+                                            alt="{{ $product->name }}">
+                                    @endif
+
                                 </div>
-                                <div class="text-muted" style="font-size: 12px;">Nếu bạn tải lên file ảnh mới, hình ảnh
-                                    cũ này sẽ bị thay thế hoàn toàn.</div>
+
+                                <div>
+                                    <div class="fw-bold text-dark" style="font-size:13.5px;">
+                                        Ảnh hiện tại của sản phẩm
+                                    </div>
+
+                                    <div class="text-muted" style="font-size:12px;">
+                                        Nếu tải ảnh mới lên, ảnh hiện tại sẽ bị thay thế.
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+
                         @endif
 
                         <div class="pt-1">
-                            <input type="file" name="image" class="form-control" accept="image/*"
+                            <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept=".png,.jpg,.jpeg,.webp"
                                 style="font-size: 13.5px; border-radius: 6px;">
+                                @error('category_id')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             <span class="form-help-text">Hỗ trợ định dạng file: JPG, PNG, JPEG, WEBP. Dung lượng tối đa
                                 2MB.</span>
                         </div>

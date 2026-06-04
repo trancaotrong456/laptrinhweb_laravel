@@ -16,10 +16,10 @@ class ProductController extends Controller
     {
         $products = Product::with('category');
 
-        // tìm kiếm
+        // tìm kiếm theo tên sản phẩm
         $products = $this->searchByName($products, $request);
 
-        // lọc category
+        // lọc category theo id
         $products = $this->filterByCategory($products, $request);
 
         // sắp xếp
@@ -30,7 +30,7 @@ class ProductController extends Controller
 
         $categories = Category::all();
 
-        return view('products.index', [
+        return view('products.admin.products.index', [
             'products' => $products,
             'keyword' => $request->keyword,
             'categories' => $categories,
@@ -55,13 +55,9 @@ class ProductController extends Controller
     // Lọc theo category
     private function filterByCategory($products, $request)
     {
-        if ($request->category) {
-
-            $products->whereHas('category', function ($query) use ($request) {
-                $query->where('name', $request->category);
-            });
+        if ($request->filled('category_id')) {
+            $products->where('category_id', $request->category_id);
         }
-
         return $products;
     }
 
@@ -78,7 +74,7 @@ class ProductController extends Controller
     {
         $categories = Category::all();
 
-        return view('products.create', compact('categories'));
+        return view('products.admin.products.create', compact('categories'));
     }
 
     /**
@@ -86,17 +82,38 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate
         $request->validate([
-            'name' => 'required',
-            'price' => 'required|numeric',
-            'quantity' => 'required|numeric',
-            'image' => 'image|mimes:jpg,png,jpeg|max:2048',
+            'name' => 'required|max:255|min:3',
+            'price' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:1',
             'category_id' => 'required|exists:categories,id',
-            'description' => 'nullable|string'
+
+            // validate image
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'name.min' => 'Tên không hợp lệ.',
+
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+            'price.min' => 'Giá không hợp lệ.',
+
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.numeric' => 'Số lượng phải là số.',
+            'quantity.min' => 'Số lượng không hợp lệ.',
+
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'category_id.exists' => 'Danh mục không tồn tại.',
+
+            'image.image' => 'File upload phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpg, jpeg, png hoặc webp.',
+            'image.max' => 'Kích thước ảnh tối đa 2MB.',
         ]);
 
         $imageName = null;
 
+        // upload ảnh
         if ($request->hasFile('image')) {
 
             $imageName = $request
@@ -109,14 +126,15 @@ class ProductController extends Controller
             'price' => $request->price,
             'quantity' => $request->quantity,
             'image' => $imageName,
-            'description' => $request->description,
             'category_id' => $request->category_id,
             'status' => $request->quantity > 0
                 ? 'Còn hàng'
                 : 'Hết hàng'
         ]);
 
-        return redirect()->route('products.index');
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Thêm sản phẩm thành công');
     }
 
     /**
@@ -124,9 +142,9 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('category')->findOrFail($id);
 
-        return view('products.show', compact('product'));
+        return view('products.admin.products.show', compact('product'));
     }
 
     /**
@@ -135,13 +153,8 @@ class ProductController extends Controller
     public function edit($id)
     {
         $product = Product::findOrFail($id);
-
         $categories = Category::all();
-
-        return view(
-            'products.edit',
-            compact('product', 'categories')
-        );
+        return view('products.admin.products.edit', compact('product', 'categories'));
     }
 
     /**
@@ -149,17 +162,30 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'name' => 'required',
-            'price' => 'required|numeric',
-            'quantity' => 'required|numeric',
-            'image' => 'image|mimes:jpg,png,jpeg|max:2048',
-            'category_id' => 'required|exists:categories,id',
-            'description' => 'nullable|string'
-        ]);
-
         $product = Product::findOrFail($id);
-
+        $request->validate([
+            'name' => 'required|max:255|min:3',
+            'price' => 'required|numeric|min:1',
+            'quantity' => 'required|numeric|min:1',
+            'category_id' => 'required|exists:categories,id',
+    
+            // validate image
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+        ], [
+            'name.required' => 'Vui lòng nhập tên sản phẩm.',
+            'name.min' => 'Tên không hợp lệ.',
+            'price.required' => 'Vui lòng nhập giá.',
+            'price.numeric' => 'Giá phải là số.',
+    
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.numeric' => 'Số lượng phải là số.',
+    
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+    
+            'image.image' => 'File upload phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng jpg, jpeg, png hoặc webp.',
+            'image.max' => 'Kích thước ảnh tối đa 2MB.',
+        ]);
         $imageName = $product->image;
 
         if ($request->hasFile('image')) {
@@ -180,14 +206,13 @@ class ProductController extends Controller
             'price' => $request->price,
             'quantity' => $request->quantity,
             'image' => $imageName,
-            'description' => $request->description,
             'category_id' => $request->category_id,
             'status' => $request->quantity > 0
                 ? 'Còn hàng'
                 : 'Hết hàng'
         ]);
 
-        return redirect()->route('products.index');
+        return redirect()->route('products.index')->with('Cập nhật sản phẩm thành công!');
     }
 
     /**
@@ -213,28 +238,35 @@ class ProductController extends Controller
     // Sắp xếp
     public function sortProducts($products, $request)
     {
-        if ($request->sort == 'price_asc') {
-            $products->orderBy('price', 'asc');
-        } elseif ($request->sort == 'price_desc') {
-            $products->orderBy('price', 'desc');
-        } elseif ($request->sort == 'latest') {
-            $products->latest();
+        switch ($request->sort){
+            case 'price_asc':
+                $products->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $products->orderBy('price', 'desc');
+                break;
+            default :
+                $products->latest();
+                break;
+            
         }
 
         return $products;
     }
-    public function searchSuggest(Request $request)
-{
-    $keyword = $request->keyword;
-
-    $products = \App\Models\Product::where(
-        'name',
-        'LIKE',
-        "%{$keyword}%"
-    )
-    ->limit(8)
-    ->get();
-
-    return response()->json($products);
 }
-}
+
+//     public function searchSuggest(Request $request)
+//     {
+//         $keyword = $request->keyword;
+
+//         $products = \App\Models\Product::where(
+//             'name',
+//             'LIKE',
+//             "%{$keyword}%"
+//         )
+//         ->limit(8)
+//         ->get();
+
+//         return response()->json($products);
+//     }
+// }
