@@ -128,6 +128,61 @@
 .related-card:hover {
     transform: translateY(-5px);
 }
+.related-product-card{
+    border-radius:20px;
+    overflow:hidden;
+    transition:.3s ease;
+}
+
+.related-product-card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 20px 40px rgba(0,0,0,.12)!important;
+}
+
+.related-image-wrapper{
+    position:relative;
+    height:230px;
+    overflow:hidden;
+    display:block;
+}
+
+.related-image{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:.4s ease;
+}
+
+.related-product-card:hover .related-image{
+    transform:scale(1.08);
+}
+
+.related-stock{
+    position:absolute;
+    top:12px;
+    left:12px;
+    border-radius:20px;
+    padding:6px 12px;
+}
+
+.related-placeholder{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#f1f5f9;
+    font-size:40px;
+    color:#94a3b8;
+}
+
+.related-title{
+    min-height:48px;
+    overflow:hidden;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+}
 </style>
 @endpush
 
@@ -379,49 +434,116 @@
         {{-- Related products --}}
         @if($relatedProducts->isNotEmpty())
             <section class="mt-5">
-                <h3 class="fw-bold mb-3">Sản phẩm liên quan</h3>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h3 class="fw-bold mb-1">
+                            <i class="fas fa-layer-group text-primary me-2"></i>
+                            Sản phẩm liên quan
+                        </h3>
+                        <p class="text-muted mb-0">
+                            Các sản phẩm cùng danh mục mà bạn có thể quan tâm
+                        </p>
+                    </div>
+
+                    <a href="{{ route('products.all') }}"
+                        class="btn btn-outline-primary rounded-pill px-4">
+                        Xem tất cả
+                    </a>
+                </div>
+
                 <div class="row g-4">
                     @foreach($relatedProducts as $relatedProduct)
-                        @php
-                            $relatedImage = null;
-                            if ($relatedProduct->image) {
-                                if (\Illuminate\Support\Str::startsWith($relatedProduct->image, ['http://', 'https://']))
-                                    $relatedImage = $relatedProduct->image;
-                                elseif (\Illuminate\Support\Str::startsWith($relatedProduct->image, ['products/']))
-                                    $relatedImage = asset('storage/' . $relatedProduct->image);
-                                else
-                                    $relatedImage = asset('images/' . $relatedProduct->image);
+
+                    @php
+                        $relatedImage = null;
+
+                        if ($relatedProduct->image) {
+
+                            if (\Illuminate\Support\Str::startsWith(
+                                $relatedProduct->image,
+                                ['http://','https://']
+                            )) {
+
+                                $relatedImage = $relatedProduct->image;
+
+                            } elseif (\Illuminate\Support\Str::startsWith(
+                                $relatedProduct->image,
+                                ['products/']
+                            )) {
+
+                                $relatedImage = asset('storage/' . $relatedProduct->image);
+
+                            } else {
+
+                                $relatedImage = asset('images/' . $relatedProduct->image);
                             }
-                        @endphp
-                        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                            <div class="card border-0 h-100 shadow-lg overflow-hidden rounded-4 related-card">
-                                <a href="{{ route('products.detail', $relatedProduct) }}" class="position-relative overflow-hidden d-block" style="height:220px;">
-                                    @if($relatedImage)
-                                        <img src="{{ $relatedImage }}" class="card-img-top w-100 h-100 object-fit-cover" alt="{{ $relatedProduct->name }}">
-                                    @else
-                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary text-white">
-                                            <i class="fas fa-box-open fa-3x"></i>
-                                        </div>
-                                    @endif
-                                </a>
-                                <div class="card-body p-3 d-flex flex-column">
-                                    <a href="{{ route('products.detail', $relatedProduct) }}" class="text-decoration-none text-dark">
-                                        <h6 class="fw-bold mb-2" style="overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
-                                            {{ $relatedProduct->name }}
-                                        </h6>
-                                    </a>
-                                    <div class="mb-2">
-                                        <span class="h5 fw-bolder text-danger">{{ number_format($relatedProduct->price) }}đ</span>
+                        }
+                    @endphp
+
+                    <div class="col-xl-3 col-lg-4 col-md-6">
+                        <div class="card border-0 shadow-sm h-100 related-product-card">
+
+                            <a href="{{ route('products.detail', $relatedProduct->id) }}"
+                                class="related-image-wrapper">
+
+                                @if($relatedImage)
+                                    <img src="{{ $relatedImage }}"
+                                        alt="{{ $relatedProduct->name }}"
+                                        class="related-image">
+                                @else
+                                    <div class="related-placeholder">
+                                        <i class="fas fa-image"></i>
                                     </div>
-                                    <div class="mt-auto">
-                                        <a href="{{ route('products.detail', $relatedProduct) }}" class="btn btn-outline-secondary w-100 mt-2 rounded-3">Chi tiết</a>
-                                    </div>
+                                @endif
+
+                                @if($relatedProduct->quantity > 0)
+                                    <span class="badge bg-success related-stock">
+                                        Còn hàng
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger related-stock">
+                                        Hết hàng
+                                    </span>
+                                @endif
+
+                            </a>
+
+                            <div class="card-body d-flex flex-column">
+
+                                <div class="small text-muted mb-2">
+                                    {{ $relatedProduct->category->name ?? 'Sản phẩm' }}
                                 </div>
+
+                                <a href="{{ route('products.detail', $relatedProduct->id) }}"
+                                    class="text-decoration-none text-dark">
+
+                                    <h6 class="fw-bold related-title">
+                                        {{ $relatedProduct->name }}
+                                    </h6>
+
+                                </a>
+
+                                <div class="mt-auto">
+
+                                    <div class="fw-bold text-danger fs-5 mb-3">
+                                        {{ number_format($relatedProduct->price) }}đ
+                                    </div>
+
+                                    <a href="{{ route('products.detail', $relatedProduct->id) }}"
+                                        class="btn btn-primary w-100 rounded-pill">
+                                        Xem chi tiết
+                                    </a>
+
+                                </div>
+
                             </div>
+
                         </div>
-                    @endforeach
-                </div>
-            </section>
+                    </div>
+
+                @endforeach
+            </div>
+        </section>
         @endif
     </div>
 </div>
