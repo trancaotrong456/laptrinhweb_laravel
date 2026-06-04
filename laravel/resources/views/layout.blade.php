@@ -92,6 +92,9 @@
                             <a href="{{ route('products.index') }}" class="udrop-item">
                                 <i class="fas fa-box-open"></i> Sản phẩm
                             </a>
+                            <a href="{{ route('categories.index', ['manage' => 1]) }}" class="udrop-item">
+                                <i class="fas fa-tags"></i> Danh mục
+                            </a>
                             <a href="{{ route('coupons.index') }}" class="udrop-item">
                                 <i class="fas fa-percent"></i> Mã giảm giá
                             </a>
@@ -318,7 +321,148 @@
         });
     })();
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if(session('success'))
+    <script>
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: '{{ session("success") }}',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true
+    });
+    </script>
+    @endif
+    @if(session('error'))
+    <script>
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: '{{ session("error") }}',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true
+    });
+    </script>
+    @endif
+    {{-- ── SCRIPT AJAX CHO GIỎ HÀNG VÀ MÃ GIẢM GIÁ ── --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Xử lý Thêm vào giỏ hàng (AJAX)
+        document.querySelectorAll('.add-to-cart-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    if(data.success) {
+                        Swal.fire({
+                            toast: true, position: 'top-end', icon: 'success',
+                            title: data.message, showConfirmButton: false, timer: 2500, timerProgressBar: true
+                        });
+                        const badge = document.querySelector('.cart-badge');
+                        if(badge && data.cartCount !== undefined) {
+                            badge.textContent = data.cartCount;
+                            badge.classList.add('pop-animation');
+                            setTimeout(() => badge.classList.remove('pop-animation'), 300);
+                        }
+                    } else {
+                        if (data.redirect) window.location.href = data.redirect;
+                        else Swal.fire({
+                            toast: true, position: 'top-end', icon: 'error',
+                            title: data.message || 'Có lỗi xảy ra!', showConfirmButton: false, timer: 2500, timerProgressBar: true
+                        });
+                    }
+                })
+                .catch(err => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    console.error(err);
+                });
+            });
+        });
+
+        // Xử lý Lưu mã giảm giá (AJAX)
+        document.querySelectorAll('.save-coupon-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const btn = this.querySelector('button[type="submit"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: new FormData(this),
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    if(data.success) {
+                        Swal.fire({
+                            toast: true, position: 'top-end', icon: 'success',
+                            title: data.message, showConfirmButton: false, timer: 2500, timerProgressBar: true
+                        });
+                        if (btn.classList.contains('btn-collect')) {
+                            btn.classList.remove('btn-collect');
+                            btn.classList.add('btn-saved');
+                            btn.textContent = 'Đã lưu';
+                        } else if (btn.classList.contains('btn-saved')) {
+                            btn.classList.remove('btn-saved');
+                            btn.classList.add('btn-collect');
+                            btn.textContent = 'Lưu mã';
+                        }
+                    } else {
+                        Swal.fire({
+                            toast: true, position: 'top-end', icon: 'error',
+                            title: data.message || 'Có lỗi xảy ra!', showConfirmButton: false, timer: 2500, timerProgressBar: true
+                        });
+                    }
+                })
+                .catch(err => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    console.error(err);
+                });
+            });
+        });
+    });
+    </script>
+    <style>
+        .pop-animation {
+            animation: pop 0.3s ease;
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+    </style>
+
+    {{-- ── CHATBOX AI ── --}}
+    @include('layouts.chatbox')
 
 </body>
+
 
 </html>
