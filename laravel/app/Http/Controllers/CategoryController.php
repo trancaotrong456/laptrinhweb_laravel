@@ -60,8 +60,16 @@ class CategoryController extends Controller
 
         $categories = $query->paginate(10)->appends($request->query());
 
+        // Kiểm tra xem là admin và đang ở giao diện quản lý hay không
+        if (auth()->check() && auth()->user()->role === 1 && $request->has('manage')) {
+            return view(
+                'categories.index',
+                compact('categories', 'search', 'sort', 'hasParentColumn')
+            );
+        }
+
         return view(
-            'categories.index',
+            'categories.front',
             compact('categories', 'search', 'sort', 'hasParentColumn')
         );
     }
