@@ -1,165 +1,69 @@
-@extends('layout')
-
-@section('title', 'Chỉnh sửa người dùng - Siêu thị Mini')
+@extends('layouts.admin')
+@section('title', 'Chỉnh sửa người dùng - TTP Admin')
 
 @section('content')
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-7">
+<div class="page-header">
+    <h1 class="page-title"><i class="fas fa-user-edit" style="color:#2563eb;"></i> Chỉnh sửa người dùng</h1>
+    <a href="{{ route('user.listUser') }}" class="btn-outline-admin"><i class="fas fa-arrow-left"></i> Quay lại</a>
+</div>
 
-            <div class="card border-0 shadow-xl rounded-5 overflow-hidden">
-
-                {{-- HEADER --}}
-                <div class="card-header bg-gradient-primary text-white text-center py-4">
-                    <i class="fas fa-user-edit fa-3x mb-3 opacity-90"></i>
-
-                    <h1 class="h3 fw-bold mb-1">
-                        Chỉnh sửa thông tin người dùng
-                    </h1>
-
-                    <p class="mb-0 opacity-90">
-                        Cập nhật thông tin người dùng
-                    </p>
+<div class="admin-card" style="max-width: 700px; margin: 0 auto;">
+    <div class="admin-card-body" style="padding: 24px;">
+        <form action="{{ route('user.postUpdateUser', ['id' => $user->id]) }}" method="POST">
+            @csrf
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div>
+                    <label class="form-label-ctrl">Họ và tên <span style="color:#ef4444;">*</span></label>
+                    <input type="text" name="name" class="form-ctrl" value="{{ old('name', $user->name) }}" required>
+                    @error('name')<div style="color:#ef4444;font-size:12px;margin-top:4px;">{{ $message }}</div>@enderror
                 </div>
-
-                {{-- BODY --}}
-                <div class="card-body p-5">
-
-                    {{-- ERROR --}}
-                    @if ($errors->any())
-                    <div class="alert alert-danger rounded-4 shadow-sm mb-4">
-                        <h6 class="mb-3">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            Có lỗi xảy ra:
-                        </h6>
-
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    @endif
-
-                    {{-- FORM --}}
-                    <form action="{{ route('user.postUpdateUser', $user->id) }}" method="POST" class="row g-4">
-                        @csrf
-
-                        {{-- HỌ TÊN --}}
-                        <div class="col-md-12">
-                            <label class="form-label fw-semibold">
-                                Họ và tên
-                            </label>
-
-                            <input type="text" name="name" class="form-control form-control-lg rounded-3"
-                                value="{{ old('name', $user->name) }}" required>
-                        </div>
-
-                        {{-- EMAIL --}}
-                        <div class="col-md-12">
-                            <label class="form-label fw-semibold">
-                                Email
-                            </label>
-
-                            <input type="email" name="email" class="form-control form-control-lg rounded-3"
-                                value="{{ old('email', $user->email) }}" required>
-                        </div>
-
-                        {{-- NGÀY SINH --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Ngày sinh
-                            </label>
-
-                            <input type="date" name="dob" class="form-control form-control-lg rounded-3"
-                                value="{{ old('dob', $user->dob) }}">
-                        </div>
-
-                        {{-- GIỚI TÍNH --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Giới tính
-                            </label>
-
-                            <div class="mt-2">
-
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" value="Nam"
-                                        {{ old('gender', $user->gender) === 'Nam' ? 'checked' : '' }}>
-
-                                    <label class="form-check-label">
-                                        Nam
-                                    </label>
-                                </div>
-
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" value="Nữ"
-                                        {{ old('gender', $user->gender) === 'Nữ' ? 'checked' : '' }}>
-
-                                    <label class="form-check-label">
-                                        Nữ
-                                    </label>
-                                </div>
-
-                            </div>
-                        </div>
-
-                        {{-- SỐ ĐIỆN THOẠI --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Số điện thoại
-                            </label>
-
-                            <input type="tel" name="phone" class="form-control form-control-lg rounded-3"
-                                value="{{ old('phone', $user->phone) }}" placeholder="0123456789">
-                        </div>
-
-                        {{-- ĐỊA CHỈ --}}
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">
-                                Địa chỉ
-                            </label>
-
-                            <input type="text" name="address" class="form-control form-control-lg rounded-3"
-                                value="{{ old('address', $user->address) }}"
-                                placeholder="Nhập địa chỉ">
-                        </div>
-
-                        {{-- MẬT KHẨU --}}
-                        <div class="col-md-12">
-                            <label class="form-label fw-semibold">
-                                Mật khẩu mới (để trống nếu không thay đổi)
-                            </label>
-
-                            <input type="password" name="password" class="form-control form-control-lg rounded-3"
-                                placeholder="Nhập mật khẩu mới">
-
-                            <small class="text-muted d-block mt-2">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Để trống nếu bạn không muốn thay đổi mật khẩu
-                            </small>
-                        </div>
-
-                        {{-- BUTTON --}}
-                        <div class="col-12 d-flex gap-3 pt-2">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-3 flex-grow-1">
-                                <i class="fas fa-save me-2"></i>
-                                Cập nhật
-                            </button>
-
-                            <a href="{{ route('user.readUser', $user->id) }}" class="btn btn-secondary btn-lg rounded-3 flex-grow-1">
-                                <i class="fas fa-times me-2"></i>
-                                Hủy
-                            </a>
-                        </div>
-
-                    </form>
-
+                <div>
+                    <label class="form-label-ctrl">Email</label>
+                    <input type="email" class="form-ctrl" value="{{ $user->email }}" disabled style="background:#f8fafc;cursor:not-allowed;">
+                    <div style="font-size:12px;color:#94a3b8;margin-top:4px;">Email không thể thay đổi</div>
                 </div>
-
             </div>
 
-        </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div>
+                    <label class="form-label-ctrl">Số điện thoại</label>
+                    <input type="text" name="phone" class="form-ctrl" value="{{ old('phone', $user->phone) }}">
+                </div>
+                <div>
+                    <label class="form-label-ctrl">Giới tính</label>
+                    <select name="gender" class="form-select-ctrl">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="Nam" {{ old('gender', $user->gender) == 'Nam' ? 'selected' : '' }}>Nam</option>
+                        <option value="Nữ" {{ old('gender', $user->gender) == 'Nữ' ? 'selected' : '' }}>Nữ</option>
+                        <option value="Khác" {{ old('gender', $user->gender) == 'Khác' ? 'selected' : '' }}>Khác</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                <div>
+                    <label class="form-label-ctrl">Ngày sinh</label>
+                    <input type="date" name="dob" class="form-ctrl" value="{{ old('dob', $user->dob ? \Carbon\Carbon::parse($user->dob)->format('Y-m-d') : '') }}">
+                </div>
+                <div>
+                    <label class="form-label-ctrl">Vai trò (Role)</label>
+                    <select name="role" class="form-select-ctrl">
+                        <option value="0" {{ old('role', $user->role) == 0 ? 'selected' : '' }}>USER (Khách hàng)</option>
+                        <option value="1" {{ old('role', $user->role) == 1 ? 'selected' : '' }}>ADMIN (Quản trị viên)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom:24px;">
+                <label class="form-label-ctrl">Địa chỉ</label>
+                <textarea name="address" class="form-ctrl" rows="3">{{ old('address', $user->address) }}</textarea>
+            </div>
+
+            <div style="text-align:right;border-top:1px solid #f1f5f9;padding-top:20px;">
+                <button type="submit" class="btn-primary-admin"><i class="fas fa-save"></i> Cập nhật thông tin</button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

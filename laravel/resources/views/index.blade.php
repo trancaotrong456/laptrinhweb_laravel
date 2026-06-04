@@ -143,6 +143,219 @@ Swal.fire({
         @endif
     </div>
 
+
+    {{-- ═══════════ FLASH SALE SECTION ═══════════ --}}
+    @if(isset($activeFlashSales) && $activeFlashSales->count() > 0)
+    @php
+        $fsEndAt = $flashSaleEndsAt ?? now()->addHours(8);
+        $fsEndTimestamp = $fsEndAt->timestamp;
+    @endphp
+    <div class="flash-sale-section mb-5">
+        {{-- Header với đồng hồ đếm ngược --}}
+        <div class="fs-header d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="fs-title-badge">
+                    <i class="fas fa-bolt"></i>
+                    <span>FLASH SALE</span>
+                </div>
+                <div class="fs-status-badge">Đang diễn ra</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span style="font-size:14px; color:#fff; font-weight:600; opacity:.85;">Kết thúc sau:</span>
+                <div class="fs-countdown">
+                    <div class="fs-cd-block">
+                        <span class="fs-cd-num" id="fsH">00</span>
+                        <span class="fs-cd-label">Giờ</span>
+                    </div>
+                    <span class="fs-cd-sep">:</span>
+                    <div class="fs-cd-block">
+                        <span class="fs-cd-num" id="fsM">00</span>
+                        <span class="fs-cd-label">Phút</span>
+                    </div>
+                    <span class="fs-cd-sep">:</span>
+                    <div class="fs-cd-block">
+                        <span class="fs-cd-num" id="fsS">00</span>
+                        <span class="fs-cd-label">Giây</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Sản phẩm Flash Sale --}}
+        <div class="fs-products-row">
+            @foreach($activeFlashSales as $fs)
+            @php
+                $p = $fs->product;
+                if (!$p) continue;
+                $pImg = null;
+                if ($p->image) {
+                    $pImg = str_contains($p->image, '/')
+                        ? asset('storage/' . $p->image)
+                        : asset('images/' . $p->image);
+                }
+                $discount = $p->price > 0 ? round((1 - $fs->sale_price / $p->price) * 100) : 0;
+            @endphp
+            <div class="fs-product-card">
+                <a href="{{ route('products.detail', $p) }}" class="fs-product-img-wrap">
+                    @if($discount > 0)
+                    <span class="fs-discount-badge">-{{ $discount }}%</span>
+                    @endif
+                    @if($pImg)
+                        <img src="{{ $pImg }}" alt="{{ $p->name }}" class="fs-product-img">
+                    @else
+                        <div class="fs-product-no-img"><i class="fas fa-box-open"></i></div>
+                    @endif
+                </a>
+                <div class="fs-product-info">
+                    <a href="{{ route('products.detail', $p) }}" class="fs-product-name">{{ $p->name }}</a>
+                    <div class="fs-product-price-row">
+                        <span class="fs-product-sale-price">{{ number_format($fs->sale_price) }}đ</span>
+                        <span class="fs-product-original-price">{{ number_format($p->price) }}đ</span>
+                    </div>
+                    @auth
+                    <form class="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="product_id" value="{{ $p->id }}">
+                        <input type="hidden" name="price" value="{{ $fs->sale_price }}">
+                        <button type="submit" class="fs-add-to-cart"
+                            {{ $p->quantity <= 0 ? 'disabled' : '' }}>
+                            Thêm vào giỏ
+                        </button>
+                    </form>
+                    @else
+                    <a href="{{ route('login') }}" class="fs-add-to-cart">Thêm vào giỏ</a>
+                    @endauth
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    <style>
+    .flash-sale-section {
+        background: linear-gradient(135deg, #ef4444, #e11d48);
+        border-radius: 20px;
+        padding: 20px 24px;
+        overflow: hidden;
+    }
+    .fs-title-badge {
+        display: flex; align-items: center; gap: 8px;
+        background: rgba(255,255,255,.15);
+        padding: 8px 18px; border-radius: 50px;
+        color: #fff; font-size: 17px; font-weight: 900;
+        letter-spacing: 1px;
+        backdrop-filter: blur(4px);
+    }
+    .fs-title-badge i { color: #fbbf24; font-size: 18px; }
+    .fs-status-badge {
+        background: rgba(255,255,255,.95);
+        color: #ef4444; font-weight: 700; font-size: 12px;
+        padding: 5px 14px; border-radius: 50px;
+        border: 1.5px solid rgba(255,255,255,.8);
+    }
+    .fs-countdown { display: flex; align-items: center; gap: 6px; }
+    .fs-cd-block {
+        background: rgba(255,255,255,.15);
+        backdrop-filter: blur(4px);
+        border-radius: 10px;
+        padding: 6px 14px; text-align: center; min-width: 54px;
+        border: 1.5px solid rgba(255,255,255,.2);
+    }
+    .fs-cd-num {
+        display: block; font-size: 22px; font-weight: 900;
+        color: #fff; line-height: 1.1;
+    }
+    .fs-cd-label { font-size: 10px; color: rgba(255,255,255,.8); font-weight: 600; }
+    .fs-cd-sep { font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 12px; }
+
+    /* Products Row */
+    .fs-products-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 14px;
+    }
+    .fs-product-card {
+        background: #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: transform .2s, box-shadow .2s;
+        box-shadow: 0 4px 15px rgba(0,0,0,.1);
+    }
+    .fs-product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,.18);
+    }
+    .fs-product-img-wrap {
+        display: block; position: relative; width: 100%;
+        aspect-ratio: 1/1; overflow: hidden; background: #f8fafc;
+        text-decoration: none;
+    }
+    .fs-product-img {
+        width: 100%; height: 100%; object-fit: cover;
+        transition: transform .3s;
+    }
+    .fs-product-card:hover .fs-product-img { transform: scale(1.05); }
+    .fs-product-no-img {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 32px; color: #cbd5e1;
+    }
+    .fs-discount-badge {
+        position: absolute; top: 8px; left: 8px; z-index: 2;
+        background: #ef4444; color: #fff;
+        font-size: 11px; font-weight: 800;
+        padding: 3px 8px; border-radius: 50px;
+    }
+    .fs-product-info { padding: 12px; }
+    .fs-product-name {
+        display: block; font-size: 13px; font-weight: 600;
+        color: #1e293b; text-decoration: none; margin-bottom: 6px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .fs-product-name:hover { color: #ef4444; }
+    .fs-product-price-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .fs-product-sale-price { font-size: 16px; font-weight: 800; color: #ef4444; }
+    .fs-product-original-price { font-size: 12px; color: #94a3b8; text-decoration: line-through; }
+    .fs-add-to-cart {
+        display: block; width: 100%; padding: 8px;
+        background: #ef4444; color: #fff;
+        border: none; border-radius: 50px;
+        font-size: 12px; font-weight: 700;
+        text-align: center; cursor: pointer;
+        text-decoration: none; transition: all .2s;
+        font-family: inherit;
+    }
+    .fs-add-to-cart:hover { background: #dc2626; color: #fff; }
+    .fs-add-to-cart:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    @media (max-width: 768px) {
+        .fs-products-row { grid-template-columns: repeat(2, 1fr); }
+    }
+    </style>
+
+    <script>
+    (function() {
+        var endTs = {{ $fsEndTimestamp }} * 1000;
+        function pad(n) { return String(n).padStart(2, '0'); }
+        function tick() {
+            var diff = Math.max(0, endTs - Date.now());
+            var h = Math.floor(diff / 3600000);
+            var m = Math.floor((diff % 3600000) / 60000);
+            var s = Math.floor((diff % 60000) / 1000);
+            var hEl = document.getElementById('fsH');
+            var mEl = document.getElementById('fsM');
+            var sEl = document.getElementById('fsS');
+            if(hEl) hEl.textContent = pad(h);
+            if(mEl) mEl.textContent = pad(m);
+            if(sEl) sEl.textContent = pad(s);
+            if(diff <= 0) clearInterval(timer);
+        }
+        tick();
+        var timer = setInterval(tick, 1000);
+    })();
+    </script>
+    @endif
+
     {{-- 🌟 ═══════════ SECTION TRƯNG BÀY MÃ GIẢM GIÁ ═══════════ 🌟 --}}
     @if(isset($coupons) && $coupons->count() > 0)
     <div class="section-title mb-3 d-flex align-items-center justify-content-between">

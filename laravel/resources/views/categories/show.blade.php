@@ -1,174 +1,157 @@
-@extends('layouts.app')
-
+@extends('layout')
+@section('title', $category->name . ' - Danh mục')
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Thông tin danh mục -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            <a href="{{ route('categories.index') }}" class="btn btn-outline-secondary me-3">
-                                <i class="fas fa-arrow-left"></i>
-                            </a>
-                            <div>
-                                <h4 class="card-title mb-0">
-                                    <i class="fas fa-tag me-2"></i>{{ $category->name }}
-                                </h4>
-                                <small class="text-muted">ID: {{ $category->id }}</small>
-                            </div>
-                        </div>
-                        @if(auth()->check() && auth()->user()->role === 1)
-                            <div class="btn-group">
-                                <a href="{{ route('categories.edit', $category) }}" class="btn btn-warning">
-                                    <i class="fas fa-edit me-1"></i>Chỉnh sửa
-                                </a>
-                                @if($category->products_count == 0)
-                                    <form action="{{ route('categories.destroy', $category) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger"
-                                                onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
-                                            <i class="fas fa-trash me-1"></i>Xóa
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
+<style>
+    .bg-gradient-green {
+        background: linear-gradient(135deg, #1e7e34 0%, #28a745 100%);
+    }
+    .text-green {
+        color: #28a745 !important;
+    }
+    .btn-green {
+        background-color: #28a745;
+        color: white;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .btn-green:hover {
+        background-color: #1e7e34;
+        color: white;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="card border-0 rounded-4 bg-gradient-green text-white p-4 p-md-5 mb-4 position-relative shadow-sm">
+        <div class="row align-items-center">
+            <div class="col-md-8 position-relative" style="z-index: 2;">
+                <div class="d-flex align-items-center mb-3">
+                    <a href="{{ route('categories.index') }}" class="btn btn-light btn-sm rounded-circle me-3 text-green shadow-sm" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <span class="badge bg-white text-success px-3 py-2 rounded-pill fw-bold shadow-sm">Danh mục</span>
+                </div>
+                <h1 class="display-5 fw-bold mb-2">{{ $category->name }}</h1>
+                <p class="lead opacity-90 mb-0">
+                    {{ $category->description ?: 'Thỏa thích lựa chọn hàng nghìn mặt hàng tươi sạch mỗi ngày.' }}
+                </p>
+                <div class="mt-3 fs-6 opacity-75">
+                    <i class="fas fa-fingerprint me-1"></i> ID Danh mục: {{ $category->id }} 
+                    <span class="mx-2">|</span> 
+                    <i class="fas fa-calendar-alt me-1"></i> Ngày khởi tạo: {{ $category->created_at->format('d/m/Y') }}
+                </div>
+            </div>
+            
+            @if(auth()->check() && auth()->user()->role === 1)
+                <div class="col-md-4 text-md-end mt-4 mt-md-0 position-relative" style="z-index: 2;">
+                    <div class="btn-group bg-white p-2 rounded-3 shadow-sm">
+                        <a href="{{ route('categories.edit', $category) }}" class="btn btn-link text-warning text-decoration-none fw-bold px-3">
+                            <i class="fas fa-edit me-1"></i>Sửa
+                        </a>
+                        @if($category->products_count == 0)
+                            <span class="text-muted py-1">|</span>
+                            <form action="{{ route('categories.destroy', $category) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-link text-danger text-decoration-none fw-bold px-3" onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')">
+                                    <i class="fas fa-trash me-1"></i>Xóa
+                                </button>
+                            </form>
                         @endif
                     </div>
                 </div>
+            @endif
+        </div>
+        <div class="position-absolute end-0 bottom-0 opacity-10 text-white display-1 fw-bold pe-5 pb-3 d-none d-md-block" style="font-size: 8rem; pointer-events: none;">
+            <i class="fas fa-leaf"></i>
+        </div>
+    </div>
 
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h6 class="fw-bold mb-2">Mô tả</h6>
-                            <p class="mb-0">
-                                {{ $category->description ?: 'Chưa có mô tả cho danh mục này.' }}
-                            </p>
+    <div class="row mb-3 align-items-center">
+        <div class="col-6">
+            <h4 class="fw-bold mb-0 text-dark">
+                <i class="fas fa-boxes text-green me-2"></i>Sản phẩm đang bán
+            </h4>
+        </div>
+        <div class="col-6 text-end">
+            <span class="fs-5 fw-bold text-green bg-light px-3 py-2 rounded-3">
+                Tổng số: {{ $products->total() }} mặt hàng
+            </span>
+        </div>
+    </div>
+
+    @if($products->count() > 0)
+        <div class="row g-3 mb-4">
+            @foreach($products as $product)
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="product-card" style="height: 100%;">
+                    <a href="{{ route('products.detail', $product) }}" class="pc-img-wrap d-block">
+                        @if($product->image)
+                        <img src="{{ asset('images/' . $product->image) }}" alt="{{ $product->name }}"
+                            onerror="this.parentElement.innerHTML='<div class=\'no-img\'><i class=\'fas fa-image\'></i></div>'">
+                        @else
+                        <div class="no-img"><i class="fas fa-image"></i></div>
+                        @endif
+                        
+                        @if($product->quantity <= 0)
+                            <span class="pc-badge" style="background:#dc3545;">Hết hàng</span>
+                        @elseif($product->quantity <= 10)
+                            <span class="pc-badge" style="background:#ffc107;color:#000;">Sắp hết</span>
+                        @endif
+
+                        {{-- Add to cart overlay --}}
+                        @auth
+                        <form class="add-to-cart-form" action="{{ route('cart.add') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <button type="submit" class="pc-add-overlay" title="Thêm vào giỏ"
+                                {{ $product->quantity <= 0 ? 'disabled' : '' }}>
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </form>
+                        @endauth
+                    </a>
+                    <div class="pc-body d-flex flex-column" style="height: calc(100% - 200px);">
+                        <div class="pc-origin">
+                            {{ $category->name }}
                         </div>
-                        <div class="col-md-4">
-                            <div class="row">
-                                <div class="col-6">
-                                    <div class="card bg-primary text-white text-center">
-                                        <div class="card-body py-3">
-                                            <h3 class="mb-0">{{ $category->products_count }}</h3>
-                                            <small>Sản phẩm</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="card bg-success text-white text-center">
-                                        <div class="card-body py-3">
-                                            <h6 class="mb-0">{{ $category->created_at->format('d/m/Y') }}</h6>
-                                            <small>Ngày tạo</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <a href="{{ route('products.detail', $product) }}" class="pc-name" title="{{ $product->name }}">{{ $product->name }}</a>
+                        <div class="pc-price-row d-flex justify-content-between align-items-end mt-auto">
+                            <span class="pc-price">{{ number_format($product->price) }}đ</span>
+                            @if(auth()->check() && auth()->user()->role === 1)
+                                <a href="{{ route('products.edit', $product) }}" class="btn btn-sm btn-outline-warning" style="padding: 2px 8px; font-size: 11px; border-radius: 4px;" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i> Sửa
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
+            @endforeach
+        </div>
 
-            <!-- Danh sách sản phẩm -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-boxes me-2"></i>Sản phẩm trong danh mục
-                        <span class="badge bg-primary ms-2">{{ $products->total() }}</span>
-                    </h5>
-                </div>
-
-                <div class="card-body">
-                    @if($products->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-hover table-striped">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th width="5%">#</th>
-                                        <th width="10%">Ảnh</th>
-                                        <th width="25%">Tên sản phẩm</th>
-                                        <th width="15%">Giá</th>
-                                        <th width="10%">Số lượng</th>
-                                        <th width="20%">Mô tả</th>
-                                        <th width="15%">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($products as $product)
-                                    <tr>
-                                        <td>{{ $products->firstItem() + $loop->index }}</td>
-                                        <td>
-                                            @if($product->image)
-                                                <img src="{{ asset('storage/' . $product->image) }}"
-                                                     alt="{{ $product->name }}"
-                                                     class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">
-                                            @else
-                                                <div class="bg-light d-flex align-items-center justify-content-center"
-                                                     style="width: 50px; height: 50px; border-radius: 5px;">
-                                                    <i class="fas fa-image text-muted"></i>
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <strong>{{ $product->name }}</strong>
-                                        </td>
-                                        <td>
-                                            <span class="text-success fw-bold">
-                                                {{ number_format($product->price) }} VNĐ
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @if($product->quantity > 10)
-                                                <span class="badge bg-success">{{ $product->quantity }}</span>
-                                            @elseif($product->quantity > 0)
-                                                <span class="badge bg-warning">{{ $product->quantity }}</span>
-                                            @else
-                                                <span class="badge bg-danger">Hết hàng</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            {{ $product->description ? Str::limit($product->description, 30) : 'Chưa có mô tả' }}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('products.show', $product) }}"
-                                                   class="btn btn-sm btn-outline-info"
-                                                   title="Xem chi tiết">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{{ route('products.edit', $product) }}"
-                                                   class="btn btn-sm btn-outline-warning"
-                                                   title="Chỉnh sửa">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Phân trang -->
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $products->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-5">
-                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Chưa có sản phẩm nào trong danh mục này</h5>
-                            <p class="text-muted">Hãy thêm sản phẩm đầu tiên vào danh mục "{{ $category->name }}"</p>
-                            <a href="{{ route('products.create') }}?category_id={{ $category->id }}"
-                               class="btn btn-primary">
-                                <i class="fas fa-plus me-1"></i>Thêm sản phẩm
-                            </a>
-                        </div>
-                    @endif
-                </div>
+        <div class="d-flex justify-content-center mt-5">
+            <div class="shadow-sm rounded-pill p-1 bg-light">
+                {{ $products->links() }}
             </div>
         </div>
-    </div>
+    @else
+        <div class="text-center py-5 my-4 bg-light rounded-4 border border-dashed p-5">
+            <div class="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                <i class="fas fa-apple-alt fa-2x text-muted"></i>
+            </div>
+            <h4 class="fw-bold text-secondary">Chưa có mặt hàng nào!</h4>
+            <p class="text-muted max-w-md mx-auto mb-4">Danh mục "{{ $category->name }}" hiện tại chưa được cập nhật sản phẩm nào vào hệ thống bán lẻ.</p>
+            @if(auth()->check() && auth()->user()->role === 1)
+                <a href="{{ route('products.create') }}?category_id={{ $category->id }}" class="btn btn-green px-4 py-2">
+                    <i class="fas fa-plus me-2"></i>Thêm Sản Phẩm Đầu Tiên
+                </a>
+            @else
+                <a href="{{ route('home') }}" class="btn btn-green px-4 py-2">
+                    <i class="fas fa-home me-2"></i>Về Trang Chủ
+                </a>
+            @endif
+        </div>
+    @endif
 </div>
 @endsection

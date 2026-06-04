@@ -1,6 +1,10 @@
-# TODO - Dropdown tài khoản
+# TODO
 
-- [ ] (1) Cập nhật `resources/views/layout.blade.php`: trigger dropdown chỉ mở khi bấm, click ngoài đóng; tăng kích thước vùng bấm.
-- [ ] (2) Cập nhật `resources/views/layouts/app.blade.php`: bỏ phụ thuộc `data-bs-toggle`, tự toggle bằng JS theo click; click ngoài đóng; tăng kích thước vùng bấm.
-- [ ] (3) Test thủ công: đăng nhập → bấm avatar/tên mở; click ngoài đóng; không mở bằng hover.
+## Goal: Fix Laravel error "InvalidArgumentException: Please provide a valid cache path." / "View path not found."
+
+- [ ] Create missing storage directories: `storage/framework/views` and ensure write access.
+- [ ] Ensure Laravel cache/view compiled path resolves to a valid directory (typically `storage/framework/views`).
+- [ ] Clear/rebuild view/compiler caches: `php artisan view:clear` (or equivalent), then retry running the app.
+- [ ] If still failing, adjust `config/view.php` to force a valid compiled path when `VIEW_COMPILED_PATH` is empty.
+- [ ] Verify by refreshing the page / running a minimal artisan command.
 

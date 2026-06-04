@@ -14,11 +14,14 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ProductShopController;
 use App\Http\Controllers\SavedCouponController;
 use App\Http\Controllers\UtilityController;
+use App\Http\Controllers\AdminOrderController;
+use App\Http\Controllers\FlashSaleController;
 
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Coupon;
 use App\Models\UserSavedCoupon;
+use App\Models\FlashSale;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +37,10 @@ Route::get('/', function () {
         ->orderBy('priority', 'desc')
         ->take(4)
         ->get();
+
+    // Flash Sales đang hoạt động
+    $activeFlashSales = FlashSale::active()->with('product')->get();
+    $flashSaleEndsAt  = $activeFlashSales->first()?->ends_at;
 
     // Fetch categories from database with product count
     $categories = Category::withCount('products')
@@ -73,7 +80,9 @@ Route::get('/', function () {
             'banners',
             'categories',
             'coupons',
-            'savedCouponIds'
+            'savedCouponIds',
+            'activeFlashSales',
+            'flashSaleEndsAt'
         )
     );
 
@@ -363,6 +372,22 @@ Route::middleware(['auth'])->group(function () {
 
             Route::get('/delete/{id}', [CrudUserController::class, 'deleteUser'])
                 ->name('user.deleteUser');
+
+            // Cấp quyền admin
+            Route::patch('/promote/{id}', [CrudUserController::class, 'promoteUser'])
+                ->name('user.promoteUser');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADMIN ORDERS MANAGEMENT
+        |--------------------------------------------------------------------------
+        */
+
+        Route::prefix('admin/orders')->group(function () {
+            Route::get('/', [AdminOrderController::class, 'index'])->name('admin.orders.index');
+            Route::get('/{id}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
+            Route::patch('/{id}/status', [AdminOrderController::class, 'updateStatus'])->name('admin.orders.updateStatus');
         });
 
 
@@ -384,6 +409,20 @@ Route::middleware(['auth'])->group(function () {
             CouponController::class
         )->except(['show']);
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | FLASH SALE ADMIN
+        |--------------------------------------------------------------------------
+        */
+
+        Route::prefix('admin/flash-sales')->name('admin.flash-sales.')->group(function () {
+            Route::get('/',                          [FlashSaleController::class, 'index'])  ->name('index');
+            Route::post('/',                         [FlashSaleController::class, 'store'])  ->name('store');
+            Route::get('/{flashSale}/edit',          [FlashSaleController::class, 'edit'])   ->name('edit');
+            Route::put('/{flashSale}',               [FlashSaleController::class, 'update']) ->name('update');
+            Route::delete('/{flashSale}',            [FlashSaleController::class, 'destroy'])->name('destroy');
+        });
 
         /*
         |--------------------------------------------------------------------------

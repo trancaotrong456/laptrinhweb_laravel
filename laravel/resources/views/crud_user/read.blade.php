@@ -1,139 +1,82 @@
-@extends('layout')
-
-@section('title', 'Chi tiết người dùng - Siêu thị Mini')
+@extends('layouts.admin')
+@section('title', 'Chi tiết người dùng - TTP Admin')
 
 @section('content')
-<div class="container py-5">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h1 class="h3 fw-bold">
-                <i class="fas fa-user-circle me-2"></i>
-                Chi tiết người dùng
-            </h1>
-        </div>
-        <div class="col-md-6 text-end">
-            <a href="{{ route('user.listUser') }}" class="btn btn-secondary btn-lg rounded-4">
-                <i class="fas fa-arrow-left me-2"></i>
-                Quay lại
-            </a>
-        </div>
+<div class="page-header">
+    <h1 class="page-title"><i class="fas fa-user-circle" style="color:#2563eb;"></i> Chi tiết người dùng</h1>
+    <a href="{{ route('user.listUser') }}" class="btn-outline-admin"><i class="fas fa-arrow-left"></i> Quay lại</a>
+</div>
+
+<div class="admin-card" style="max-width: 700px; margin: 0 auto;">
+    <div class="admin-card-header" style="background:#f8fafc;padding:16px 24px;">
+        <h6 class="admin-card-title"><i class="fas fa-info-circle" style="color:#64748b;"></i> Thông tin cá nhân</h6>
     </div>
-
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-
-                {{-- HEADER --}}
-                <div class="card-header bg-gradient-primary text-white py-4">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Thông tin cá nhân
-                    </h5>
-                </div>
-
-                {{-- BODY --}}
-                <div class="card-body p-5">
-
-                    {{-- ID --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">
-                            ID
-                        </label>
-                        <p class="h6">{{ $user->id }}</p>
-                    </div>
-
-                    {{-- HỌ TÊN --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">
-                            Họ và tên
-                        </label>
-                        <p class="h6">{{ $user->name }}</p>
-                    </div>
-
-                    {{-- EMAIL --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">
-                            Email
-                        </label>
-                        <p class="h6">
-                            <a href="mailto:{{ $user->email }}">{{ $user->email }}</a>
-                        </p>
-                    </div>
-
-                    {{-- SỐ ĐIỆN THOẠI --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">
-                            Số điện thoại
-                        </label>
-                        <p class="h6">{{ $user->phone ?? 'Chưa cập nhật' }}</p>
-                    </div>
-
-                    {{-- ĐỊA CHỈ --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">
-                            Địa chỉ
-                        </label>
-                        <p class="h6">{{ $user->address ?? 'Chưa cập nhật' }}</p>
-                    </div>
-
-                    {{-- NGÀY SINH --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">
-                            Ngày sinh
-                        </label>
-                        <p class="h6">
-                            @if ($user->dob)
-                                {{ \Carbon\Carbon::parse($user->dob)->format('d/m/Y') }}
-                            @else
-                                Chưa cập nhật
-                            @endif
-                        </p>
-                    </div>
-
-                    {{-- GIỚI TÍNH --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">
-                            Giới tính
-                        </label>
-                        <p class="h6">{{ $user->gender ?? 'Chưa cập nhật' }}</p>
-                    </div>
-
-                    {{-- NGÀY TẠO --}}
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold text-muted">
-                            Ngày tạo tài khoản
-                        </label>
-                        <p class="h6">{{ $user->created_at->format('d/m/Y H:i') }}</p>
-                    </div>
-
-                    {{-- NGÀY CẬP NHẬT --}}
-                    <div class="mb-0">
-                        <label class="form-label fw-semibold text-muted">
-                            Ngày cập nhật gần nhất
-                        </label>
-                        <p class="h6">{{ $user->updated_at->format('d/m/Y H:i') }}</p>
-                    </div>
-
-                </div>
-
+    <div class="admin-card-body" style="padding: 24px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+            <div>
+                <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">ID</label>
+                <div style="font-size:14px;font-weight:600;color:#1e293b;">#{{ $user->id }}</div>
             </div>
-
-            {{-- ACTION BUTTONS --}}
-            <div class="d-flex gap-3 mt-4">
-                <a href="{{ route('user.updateUser', $user->id) }}" class="btn btn-warning btn-lg rounded-4 flex-grow-1">
-                    <i class="fas fa-edit me-2"></i>
-                    Chỉnh sửa
-                </a>
-                <form action="{{ route('user.deleteUser', $user->id) }}" method="POST" class="flex-grow-1">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger btn-lg rounded-4 w-100"
-                        onclick="return confirm('Bạn chắc chắn muốn xóa người dùng này?')">
-                        <i class="fas fa-trash me-2"></i>
-                        Xóa
-                    </button>
-                </form>
+            <div>
+                <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">Họ và tên</label>
+                <div style="font-size:14px;font-weight:600;color:#1e293b;">{{ $user->name }}</div>
             </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+            <div>
+                <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">Email</label>
+                <div style="font-size:14px;font-weight:600;color:#2563eb;"><a href="mailto:{{ $user->email }}" style="color:inherit;text-decoration:none;">{{ $user->email }}</a></div>
+            </div>
+            <div>
+                <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">Số điện thoại</label>
+                <div style="font-size:14px;font-weight:600;color:#1e293b;">{{ $user->phone ?? 'Chưa cập nhật' }}</div>
+            </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">Địa chỉ</label>
+            <div style="font-size:14px;font-weight:600;color:#1e293b;">{{ $user->address ?? 'Chưa cập nhật' }}</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+            <div>
+                <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">Ngày sinh</label>
+                <div style="font-size:14px;font-weight:600;color:#1e293b;">
+                    @if ($user->dob)
+                        {{ \Carbon\Carbon::parse($user->dob)->format('d/m/Y') }}
+                    @else
+                        Chưa cập nhật
+                    @endif
+                </div>
+            </div>
+            <div>
+                <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">Giới tính</label>
+                <div style="font-size:14px;font-weight:600;color:#1e293b;">{{ $user->gender ?? 'Chưa cập nhật' }}</div>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;border-top:1px dashed #e2e8f0;padding-top:20px;">
+            <div>
+                <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">Ngày tạo tài khoản</label>
+                <div style="font-size:14px;font-weight:600;color:#1e293b;">{{ $user->created_at->format('d/m/Y H:i') }}</div>
+            </div>
+            <div>
+                <label class="form-label-ctrl" style="color:#94a3b8;margin-bottom:4px;">Cập nhật lần cuối</label>
+                <div style="font-size:14px;font-weight:600;color:#1e293b;">{{ $user->updated_at->format('d/m/Y H:i') }}</div>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:12px;border-top:1px solid #f1f5f9;padding-top:20px;">
+            <a href="{{ route('user.updateUser', $user->id) }}" class="btn-primary-admin" style="background:#f59e0b;color:#fff;flex:1;justify-content:center;">
+                <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <form action="{{ route('user.deleteUser', $user->id) }}" method="POST" style="flex:1;margin:0;" onsubmit="return confirm('Bạn chắc chắn muốn xóa người dùng này?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="btn-primary-admin" style="background:#ef4444;color:#fff;width:100%;justify-content:center;">
+                    <i class="fas fa-trash"></i> Xóa tài khoản
+                </button>
+            </form>
         </div>
     </div>
 </div>
