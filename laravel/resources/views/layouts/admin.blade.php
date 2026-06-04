@@ -454,7 +454,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('categories.index') }}"
+                    <a href="{{ route('categories.index', ['manage' => 1]) }}"
                         class="sb-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
                         <span class="sb-icon"><i class="fas fa-tags"></i></span>
                         Danh mục
@@ -608,6 +608,33 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if(session('success'))
+    <script>
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: '{{ session("success") }}',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true
+    });
+    </script>
+    @endif
+    @if(session('error'))
+    <script>
+    Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: '{{ session("error") }}',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true
+    });
+    </script>
+    @endif
     @stack('scripts')
 </body>
 
