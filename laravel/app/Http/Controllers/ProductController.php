@@ -255,18 +255,3 @@ class ProductController extends Controller
     }
 }
 
-//     public function searchSuggest(Request $request)
-//     {
-//         $keyword = $request->keyword;
-
-//         $products = \App\Models\Product::where(
-//             'name',
-//             'LIKE',
-//             "%{$keyword}%"
-//         )
-//         ->limit(8)
-//         ->get();
-
-//         return response()->json($products);
-//     }
-// }
