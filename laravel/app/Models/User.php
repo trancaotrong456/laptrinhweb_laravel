@@ -35,4 +35,8 @@ class User extends Authenticatable
             'password' => 'hashed', // 👈 Cơ chế tự động biến chuỗi thường thành Bcrypt khi lưu vào DB
         ];
     }
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
 }

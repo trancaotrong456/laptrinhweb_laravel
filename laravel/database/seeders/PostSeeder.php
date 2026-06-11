@@ -15,7 +15,7 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('posts')->truncate();
+        //DB::table('posts')->truncate();
 
         $now = Carbon::now();
 

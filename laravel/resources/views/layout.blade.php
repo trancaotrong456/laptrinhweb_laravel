@@ -48,10 +48,28 @@
                         $cartQuantity = Session::has('cart')
                         ? array_sum(array_column(Session::get('cart', []), 'quantity'))
                         : \App\Models\UserCartItem::where('user_id', Auth::id())->sum('quantity');
+                        
                         @endphp
+                        
                         <i class="fas fa-shopping-cart"></i>
                         <span>Giỏ hàng</span>
                         <span class="hbadge cart-badge">{{ $cartQuantity }}</span>
+                    </a>
+                    <a href="{{ route('wishlist.index') }}"
+                    class="haction-btn"
+                    style="position:relative;">
+                        @php
+                            $wishlistCount = \App\Models\Wishlist::where(
+                            'user_id',
+                            Auth::id()
+                        )->count();
+                        @endphp
+                        <i class="fas fa-heart"></i>
+                        <span>Yêu thích</span>
+
+                        <span class="hbadge wishlist-badge">
+                            {{ $wishlistCount }}
+                        </span>
                     </a>
                     <div class="user-drop" data-user-drop>
                         <button type="button" class="haction-btn user-drop-trigger" data-user-drop-trigger

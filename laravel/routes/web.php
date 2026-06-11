@@ -1,27 +1,26 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-
-use App\Http\Controllers\CrudUserController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\PostController;
+use App\Http\Controllers\AdminOrderController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CouponController;
+use App\Http\Controllers\CrudUserController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FlashSaleController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductShopController;
 use App\Http\Controllers\SavedCouponController;
 use App\Http\Controllers\UtilityController;
-use App\Http\Controllers\AdminOrderController;
-use App\Http\Controllers\FlashSaleController;
-
-use App\Models\Product;
+use App\Http\Controllers\WishlistController;
 use App\Models\Category;
 use App\Models\Coupon;
-use App\Models\UserSavedCoupon;
 use App\Models\FlashSale;
+use App\Models\Product;
+use App\Models\UserSavedCoupon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -379,8 +378,14 @@ Route::middleware(['auth'])->group(function () {
         '/san-pham/{product}/danh-gia',
         [ProductShopController::class, 'storeReview']
     )->name('products.reviews.store');
-
-
+    Route::post(
+        '/wishlist/{product}',
+        [WishlistController::class, 'toggle']
+    )->name('wishlist.toggle');
+    Route::get(
+        '/wishlist',
+        [WishlistController::class, 'index']
+    )->name('wishlist.index');
     /*
     |--------------------------------------------------------------------------
     | ADMIN ONLY ROUTES

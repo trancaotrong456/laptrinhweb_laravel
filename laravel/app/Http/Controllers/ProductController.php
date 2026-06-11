@@ -163,6 +163,15 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         $product = Product::findOrFail($id);
+        if ($request->updated_at != $product->updated_at) {
+
+            return redirect()
+                ->route('products.index')
+                ->with(
+                    'error',
+                    'Sản phẩm đã được người khác cập nhật. Vui lòng tải lại danh sách sản phẩm.'
+                );
+        }
         $request->validate([
             'name' => 'required|max:255|min:3',
             'price' => 'required|numeric|min:1',
@@ -218,10 +227,28 @@ class ProductController extends Controller
     /**
      * Delete product
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::find($id);
 
+        if (!$product) {
+            return redirect()
+                ->route('products.index')
+                ->with(
+                    'error',
+                    'Sản phẩm đã bị xóa hoặc không tồn tại.'
+                );
+        }
+        // kiểm tra dữ liệu có bị thay đổi không
+        if ($request->updated_at != $product->updated_at) {
+
+            return redirect()
+                ->route('products.index')
+                ->with(
+                    'error',
+                    'Sản phẩm đã được cập nhật bởi người khác. Vui lòng tải lại trang trước khi xóa.'
+                );
+        }
         // xóa ảnh
         if ($product->image) {
             Storage::disk('public')

@@ -47,4 +47,11 @@ class Product extends Model
 
         return asset('images/' . $this->image);
     }
+    public function wishlists()
+    {
+        return $this->hasMany(
+            Wishlist::class,
+            'product_id'
+        );
+    }
 }

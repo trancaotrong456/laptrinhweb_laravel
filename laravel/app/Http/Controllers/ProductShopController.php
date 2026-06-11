@@ -43,10 +43,28 @@ class ProductShopController extends Controller
         );
         $products = $products
         ->with('category')
+        ->withCount('wishlists')
         ->paginate(12)
         ->withQueryString();
         $categories = Category::all();
-        return view('products.all', compact('products', 'categories'));
+        $wishlistIds = [];
+
+        if(auth()->check()) {
+
+            $wishlistIds = auth()
+                ->user()
+                ->wishlists()
+                ->pluck('product_id')
+                ->toArray();
+        }
+        return view(
+            'products.all',
+            compact(
+                'products',
+                'categories',
+                'wishlistIds'
+            )
+        );
     }
     private function searchByName($products, $request)
     {

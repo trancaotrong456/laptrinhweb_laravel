@@ -1,4 +1,5 @@
-@extends('layout')
+@extends('layouts.admin')
+
 
 @section('title', 'Chỉnh sửa sản phẩm')
 
@@ -218,7 +219,7 @@
 @endpush
 
 @section('content')
-<div class="breadcrumb-bar">
+{{-- <div class="breadcrumb-bar">
     <div class="container">
         <a href="{{ route('home') }}">Trang chủ</a>
         <span class="sep">›</span>
@@ -226,7 +227,7 @@
         <span class="sep">›</span>
         <span class="cur">Sửa sản phẩm</span>
     </div>
-</div>
+</div> --}}
 
 <div class="admin-edit-wrapper">
     <div class="card-white card-admin-form">
@@ -243,7 +244,9 @@
         <form method="POST" enctype="multipart/form-data" action="{{ route('products.update', $product->id) }}" novalidate>
             @csrf
             @method('PUT')
-
+            <input type="hidden"
+                    name="updated_at"
+                    value="{{ $product->updated_at }}">
             <div class="form-card-body">
 
                 <div class="form-group-st">
@@ -258,7 +261,7 @@
                     <span class="form-help-text">Tên sản phẩm nên bao gồm loại sản phẩm và đặc tính riêng thương
                         hiệu.</span>
                 </div>
-
+                
                 <div class="form-grid-2">
                     <div class="form-group-st">
                         <label><i class="fas fa-coins"></i> Giá bán (đ) <span class="text-danger">*</span></label>

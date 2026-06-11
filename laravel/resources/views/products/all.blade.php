@@ -158,7 +158,28 @@
             <div class="row g-3">
                 @forelse($products as $product)
                 <div class="col-6 col-md-4 col-lg-3">
-                    <div class="product-card">
+                    <div class="product-card position-relative product-hover-card">
+                        
+                            <div class="wishlist-btn-wrap">
+                                @auth
+                                <form action="{{ route('wishlist.toggle', $product) }}"
+                                      method="POST">
+                                    @csrf
+                            
+                                    <button type="submit" class="wishlist-btn">
+                            
+                                        @if(in_array($product->id, $wishlistIds))
+                                            <i class="fas fa-heart liked"></i>
+                                        @else
+                                            <i class="far fa-heart"></i>
+                                        @endif
+                            
+                                    </button>
+                                </form>
+                                @endauth
+                            </div>
+                        
+                        
                         <a href="{{ route('products.detail', $product) }}" class="pc-img-wrap d-block">
                             @if($product->image)
                                 <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}"
@@ -193,7 +214,12 @@
                             <div class="pc-price-row">
                                 <span class="pc-price">{{ number_format($product->price) }}đ</span>
                             </div>
+                            <div class="wishlist-count">
+                                <i class="fas fa-heart text-danger"></i>
+                                <span>{{ $product->wishlists_count }}</span>
+                            </div>
                         </div>
+                        
                     </div>
                 </div>
                 @empty

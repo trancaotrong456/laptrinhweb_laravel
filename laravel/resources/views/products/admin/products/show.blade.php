@@ -1,4 +1,4 @@
-@extends('layout')
+@extends('layouts.admin')
 
 @section('title', 'Chi tiết sản phẩm')
 
@@ -173,7 +173,7 @@
 
 @section('content')
 
-<div class="breadcrumb-bar">
+{{-- <div class="breadcrumb-bar">
     <div class="container">
         <a href="{{ route('home') }}">Trang chủ</a>
         <span class="sep">›</span>
@@ -181,7 +181,7 @@
         <span class="sep">›</span>
         <span class="cur">Chi tiết sản phẩm</span>
     </div>
-</div>
+</div> --}}
 
 <div class="product-detail-wrapper">
 

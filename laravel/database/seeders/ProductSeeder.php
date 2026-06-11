@@ -12,7 +12,7 @@ class ProductSeeder extends Seeder
     {
         // Xóa sạch dữ liệu cũ trong bảng products trước khi thêm mới (tránh bị trùng lặp dữ liệu)
         // Nếu bảng products có khóa ngoại liên kết chỗ khác bị lỗi, bạn có thể bỏ dòng DB::table('products')->truncate(); này đi.
-        DB::table('products')->truncate();
+        //DB::table('products')->truncate();
 
         $now = Carbon::now();
         

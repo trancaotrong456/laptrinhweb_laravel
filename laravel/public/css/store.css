@@ -1968,3 +1968,59 @@ textarea.form-control-st {
     font-size: 16px;
     color: var(--text-soft);
 }
+.product-card{
+    position: relative;
+    overflow: hidden;
+}
+
+.wishlist-btn-wrap{
+    position:absolute;
+    top:12px;
+    right:12px;
+    z-index:100;
+
+    opacity:0;
+    transform:translateY(-10px);
+    transition:.25s;
+}
+
+.wishlist-btn{
+    width:42px;
+    height:42px;
+
+    border:none;
+    border-radius:50%;
+
+    background:#fff;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.wishlist-btn i{
+    font-size:22px;
+}
+
+.liked{
+    color:#ff4d6d;
+}
+.product-card:hover .wishlist-btn-wrap{
+    opacity:1;
+    transform:translateY(0);
+}
+.wishlist-count{
+    display:flex;
+    align-items:center;
+    gap:4px;
+
+    font-size:13px;
+    color:#666;
+
+    margin-top:6px;
+}
+
+.wishlist-count i{
+    color:#ff4d6d;
+}

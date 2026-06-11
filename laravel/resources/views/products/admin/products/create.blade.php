@@ -1,4 +1,5 @@
-@extends('layout')
+@extends('layouts.admin')
+@section('title', 'Thêm sản phẩm')
 
 @section('content')
 <div class="container py-4">
@@ -12,6 +13,7 @@
 
             <form
                 action="{{ route('products.store') }}"
+                id="productForm"
                 method="POST"
                 enctype="multipart/form-data" novalidate>
 
@@ -147,6 +149,7 @@
                 <div class="d-flex gap-2">
                     <button
                         type="submit"
+                        id="submitBtn"
                         class="btn btn-success">
                         <i class="fas fa-save"></i>
                         Thêm sản phẩm
@@ -187,6 +190,16 @@ document
 
             reader.readAsDataURL(file);
         }
+});
+document.getElementById('productForm')
+.addEventListener('submit', function(){
+
+    const btn = document.getElementById('submitBtn');
+
+    btn.disabled = true;
+
+    btn.innerHTML =
+        '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
 });
 </script>
 

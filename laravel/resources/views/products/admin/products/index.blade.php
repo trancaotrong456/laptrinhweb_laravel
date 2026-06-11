@@ -1,347 +1,145 @@
-@extends('layout')
+@extends('layouts.admin')
 
 @section('title', 'Quản lý sản phẩm')
 
-@push('styles')
-<style>
-.product-admin-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 18px;
-}
-
-.product-admin-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.product-admin-title .title-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 8px;
-    background: var(--green-pale);
-    color: var(--green);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-}
-
-.product-admin-title h2 {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--text);
-}
-
-.product-filter-card {
-    margin-bottom: 18px;
-}
-
-.product-filter-grid {
-    display: grid;
-    grid-template-columns: minmax(220px, 1fr) 190px 170px auto auto;
-    gap: 10px;
-    align-items: center;
-}
-
-.product-table-card {
-    padding: 0;
-    overflow: hidden;
-}
-
-.product-thumb {
-    width: 58px;
-    height: 58px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: #f5f5f5;
-    object-fit: cover;
-    display: block;
-}
-
-.product-no-thumb {
-    width: 58px;
-    height: 58px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--green-pale2);
-    color: var(--green);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-}
-
-.product-name-cell {
-    min-width: 180px;
-}
-
-.product-name-cell strong {
-    display: block;
-    font-size: 13.5px;
-    color: var(--text);
-}
-
-.product-name-cell small {
-    display: block;
-    margin-top: 3px;
-    color: var(--text-light);
-    font-size: 12px;
-}
-
-/* Các nút xem, sửa, xóa thẳng hàng */
-.product-action-group {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    flex-wrap: nowrap;
-    /* Không cho phép rớt dòng */
-}
-
-.product-icon-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--border);
-    background: white;
-    color: var(--text-soft);
-    transition: var(--transition);
-}
-
-.product-icon-btn:hover {
-    color: var(--green);
-    border-color: var(--green-light);
-    background: var(--green-pale);
-}
-
-.product-icon-btn.warning:hover {
-    color: #ef6c00;
-    border-color: #ffe0b2;
-    background: #fff3e0;
-}
-
-.product-icon-btn.danger:hover {
-    color: var(--red);
-    border-color: #ffcdd2;
-    background: #ffebee;
-}
-
-/* ── KHU VỰC SỬA: Thay đổi vị trí dòng "Showing..." xuống dưới thanh phân trang ── */
-.product-pagination {
-    padding: 20px 18px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    flex-direction: column-reverse;
-    /* Đảo ngược vị trí: Thanh phân trang lên trên, Text mặc định xuống dưới */
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-}
-
-/* Ép thanh phân trang mặc định của Bootstrap căn giữa */
-.product-pagination>div:last-child .pagination,
-.product-pagination .pagination {
-    margin-bottom: 0;
-    justify-content: center !important;
-}
-
-/* Ép text mặc định của Bootstrap (Showing 1 to 5...) ẩn phần hiển thị gốc hoặc căn giữa */
-.product-pagination>div:last-child>div:first-child {
-    display: none !important;
-    /* Ẩn đi phần text mặc định bị lệch nếu có */
-}
-
-.product-pagination>div:last-child>div:last-child {
-    text-align: center !important;
-}
-
-@media (max-width: 991px) {
-    .product-filter-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .product-filter-grid .filter-actions {
-        grid-column: span 2;
-    }
-}
-
-@media (max-width: 575px) {
-
-    .product-admin-head,
-    .product-filter-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .product-admin-head {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .product-admin-head a,
-    .product-filter-grid .filter-actions,
-    .product-filter-grid .filter-actions a,
-    .product-filter-grid .filter-actions button {
-        width: 100%;
-    }
-}
-</style>
-@endpush
-
 @section('content')
-<div class="breadcrumb-bar">
-    <div class="container">
-        <a href="{{ route('home') }}">Trang chủ</a>
-        <span class="sep">›</span>
-        <span class="cur">Quản lý sản phẩm</span>
-    </div>
-</div>
 
 <div class="container py-4">
-    <div class="product-admin-head">
-        <div class="product-admin-title">
-            <span class="title-icon">
+    <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3 mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-success bg-opacity-10 text-success" style="width: 44px; height: 44px; font-size: 20px;">
                 <i class="fas fa-box-open"></i>
-            </span>
+            </div>
             <div>
-                <h2>Danh sách sản phẩm</h2>
-                <div class="text-muted" style="font-size:13px;">
-                    Hiển thị {{ $products->firstItem() ?? 0 }} - {{ $products->lastItem() ?? 0 }} trong
-                    {{ $products->total() }} sản phẩm
+                <h2 class="m-0 fs-4 fw-bold text-dark">Danh sách sản phẩm</h2>
+                <div class="text-muted" style="font-size: 13px;">
+                    Hiển thị {{ $products->firstItem() ?? 0 }} - {{ $products->lastItem() ?? 0 }} trong {{ $products->total() }} sản phẩm
                 </div>
             </div>
         </div>
 
-        <a class="btn-green" href="{{ route('products.create') }}">
-            <i class="fas fa-plus"></i>
-            Thêm sản phẩm
+        <a class="btn btn-success d-flex align-items-center justify-content-center gap-2 px-3 fw-medium" href="{{ route('products.create') }}">
+            <i class="fas fa-plus"></i> Thêm sản phẩm
         </a>
     </div>
 
     @if(session('success'))
-    <div class="alert-st success">
+    <div class="alert alert-success d-flex align-items-center gap-2 border-0 shadow-sm mb-4" role="alert">
         <i class="fas fa-check-circle"></i>
-        {{ session('success') }}
+        <div>{{ session('success') }}</div>
     </div>
     @endif
 
-    <div class="card-white product-filter-card">
-        <form method="GET" action="{{ route('products.index') }}" class="product-filter-grid">
-            <input type="text" name="keyword" class="form-control-st" placeholder="Nhập tên sản phẩm..."
-                value="{{ $keyword ?? '' }}">
+    <div class="card card-body border-0 shadow-sm mb-4">
+        <form method="GET" action="{{ route('products.index') }}" class="row g-2 align-items-center">
+            <div class="col-12 col-md-6 col-lg-3">
+                <input type="text" name="keyword" class="form-control" placeholder="Nhập tên sản phẩm..." value="{{ $keyword ?? '' }}">
+            </div>
 
-            <select name="category_id" class="form-control-st">
-                <option value="">Tất cả danh mục</option>
-                
-                @foreach ($categories as $category)
-                    <option value="{{ $category->id }}"
-                            {{ request('category_id') == $category->id ? 'selected' : '' }}>
+            <div class="col-12 col-md-6 col-lg-3">
+                <select name="category_id" class="form-select">
+                    <option value="">Tất cả danh mục</option>
+                    @foreach ($categories as $category)
+                        <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
                             {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-            <select name="sort" class="form-control-st">
-                <option value="">Sắp xếp mặc định</option>
-                <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>Giá tăng dần</option>
-                <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>Giá giảm dần
-                </option>
-                <option value="latest" {{ request('sort') === 'latest' ? 'selected' : '' }}>Mới nhất</option>
-            </select>
+            <div class="col-12 col-md-6 col-lg-3">
+                <select name="sort" class="form-select">
+                    <option value="">Sắp xếp mặc định</option>
+                    <option value="price_asc" {{ request('sort') === 'price_asc' ? 'selected' : '' }}>Giá tăng dần</option>
+                    <option value="price_desc" {{ request('sort') === 'price_desc' ? 'selected' : '' }}>Giá giảm dần</option>
+                    <option value="latest" {{ request('sort') === 'latest' ? 'selected' : '' }}>Mới nhất</option>
+                </select>
+            </div>
 
-            <button type="submit" class="btn-green">
-                <i class="fas fa-search"></i>
-                Tìm kiếm
-            </button>
-
-            <div class="filter-actions">
-                <a href="{{ route('products.index') }}" class="btn-green-outline">
-                    <i class="fas fa-rotate-right"></i>
-                    Xóa lọc
-                </a>
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button type="submit" class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2">
+                            <i class="fas fa-search"></i> Tìm
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <a href="{{ route('products.index') }}" class="btn btn-outline-success w-100 d-flex align-items-center justify-content-center gap-2">
+                            <i class="fas fa-rotate-right"></i> Xóa
+                        </a>
+                    </div>
+                </div>
             </div>
         </form>
     </div>
 
-    <div class="card-white product-table-card">
+    <div class="card border-0 shadow-sm overflow-hidden">
         <div class="table-responsive">
-            <table class="admin-table mb-0">
-                <thead>
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+                <thead class="table-light text-secondary small text-uppercase">
                     <tr>
-                        <th>Sản phẩm</th>
+                        <th class="ps-3" style="min-width: 200px;">Sản phẩm</th>
                         <th>Danh mục</th>
                         <th>Giá</th>
                         <th>Số lượng</th>
                         <th>Ảnh</th>
                         <th>Trạng thái</th>
-                        <th style="width:145px; text-align: center;">Thao tác</th>
+                        <th class="text-center pe-3" style="width: 145px;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($products as $product)
                     @php
-                        $imageUrl = $product->image
-                        ? asset('storage/' . $product->image)
-                        : null;
+                        $imageUrl = $product->image ? asset('storage/' . $product->image) : null;
                     @endphp
                     <tr>
-                        <td class="product-name-cell">
-                            <strong>{{ $product->name }}</strong>
-                            <small>ID: {{ $product->id }}</small>
+                        <td class="ps-3">
+                            <span class="d-block fw-bold text-dark" style="font-size: 14px;">{{ $product->name }}</span>
+                            <small class="text-muted d-block mt-0.5" style="font-size: 12px;">ID: {{ $product->id }}</small>
                         </td>
                         <td>
-                            {{ $product->category->name ?? 'Chưa phân loại' }}
+                            <span class="text-secondary">{{ $product->category->name ?? 'Chưa phân loại' }}</span>
                         </td>
                         <td>
-                            <strong class="text-red">{{ number_format($product->price) }}đ</strong>
+                            <strong class="text-danger">{{ number_format($product->price) }}đ</strong>
                         </td>
                         <td>
-                            {{ $product->quantity }}
+                            <span class="fw-semibold text-dark">{{ $product->quantity }}</span>
                         </td>
                         <td>
                             @if($imageUrl)
-                            <img class="product-thumb" src="{{ $imageUrl }}" alt="{{ $product->name }}"
-                                onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'product-no-thumb', innerHTML: '<i class=&quot;fas fa-image&quot;></i>'}))">
+                            <img src="{{ $imageUrl }}" alt="{{ $product->name }}" class="rounded-2 border bg-light" style="width: 52px; height: 52px; object-fit: cover; display: block;"
+                                 onerror="this.replaceWith(Object.assign(document.createElement('span'), {className: 'd-inline-flex align-items-center justify-content-center rounded-2 border bg-success bg-opacity-10 text-success', style: 'width: 52px; height: 52px; font-size: 16px;', innerHTML: '<i class=&quot;fas fa-image&quot;></i>'}))">
                             @else
-                            <span class="product-no-thumb">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-2 border bg-success bg-opacity-10 text-success" style="width: 52px; height: 52px; font-size: 16px;">
                                 <i class="fas fa-image"></i>
                             </span>
                             @endif
                         </td>
                         <td>
                             @if($product->status == 'Còn hàng')
-                            <span class="stock-badge in">
-                                <i class="fas fa-check-circle"></i>
-                                Còn hàng
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1" style="font-size: 12px; font-weight: 500;">
+                                <i class="fas fa-check-circle me-1"></i> Còn hàng
                             </span>
                             @else
-                            <span class="stock-badge out">
-                                <i class="fas fa-times-circle"></i>
-                                Hết hàng
+                            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-1" style="font-size: 12px; font-weight: 500;">
+                                <i class="fas fa-times-circle me-1"></i> Hết hàng
                             </span>
                             @endif
                         </td>
-                        <td>
-                            <div class="product-action-group justify-content-center">
-                                <a class="product-icon-btn" href="{{ route('products.show', $product->id) }}"
-                                    title="Chi tiết">
+                        <td class="pe-3">
+                            <div class="d-flex align-items-center justify-content-center gap-1.5">
+                                <a class="btn btn-sm btn-light border p-0 text-secondary d-inline-flex align-items-center justify-content-center rounded-2" style="width: 32px; height: 32px;" href="{{ route('products.show', $product->id) }}" title="Chi tiết">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a class="product-icon-btn warning" href="{{ route('products.edit', $product->id) }}"
-                                    title="Sửa">
+                                <a class="btn btn-sm btn-light border p-0 text-warning d-inline-flex align-items-center justify-content-center rounded-2" style="width: 32px; height: 32px;" href="{{ route('products.edit', $product->id) }}" title="Sửa">
                                     <i class="fas fa-pen"></i>
                                 </a>
-                                <form action="{{ route('products.destroy', $product->id) }}" method="POST"
-                                    onsubmit="return confirm('Xóa sản phẩm này?')">
+                                <form action="{{ route('products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('Xóa sản phẩm này?')" class="m-0">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="product-icon-btn danger" title="Xóa">
+                                    <input type="hidden" name="updated_at" value="{{ $product->updated_at }}">
+                                    <button type="submit" class="btn btn-sm btn-light border p-0 text-danger d-inline-flex align-items-center justify-content-center rounded-2" style="width: 32px; height: 32px;" title="Xóa">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -350,11 +148,11 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <i class="fas fa-box-open"></i>
-                                <h5>Không có sản phẩm nào</h5>
-                                <a href="{{ route('products.create') }}" class="btn-green mt-2">
+                        <td colspan="7" class="text-center py-5 text-muted">
+                            <div class="d-flex flex-column align-items-center justify-content-center gap-2">
+                                <i class="fas fa-box-open fs-1 text-secondary opacity-50"></i>
+                                <h5 class="m-0 mt-2 text-dark fw-semibold" style="font-size: 16px;">Không có sản phẩm nào</h5>
+                                <a href="{{ route('products.create') }}" class="btn btn-success btn-sm mt-1">
                                     Thêm sản phẩm đầu tiên
                                 </a>
                             </div>
@@ -365,17 +163,24 @@
             </table>
         </div>
 
-        {{-- ── VÙNG ĐỔI CẤU TRÚC: Đưa text thông tin / số trang xuống dưới cùng và căn giữa ── --}}
         @if($products->hasPages())
-        <div class="product-pagination">
-            <div style="font-size:13px; color:var(--text-soft); font-weight: 500; text-align: center; width: 100%;">
+        <div class="card-footer bg-white border-top p-3 d-flex flex-column-reverse align-items-center gap-2">
+            <div class="text-secondary fw-medium" style="font-size: 13px;">
                 Trang {{ $products->currentPage() }} / {{ $products->lastPage() }}
             </div>
-            <div style="width: 100%;">
+            <div class="w-100 d-flex justify-content-center custom-bootstrap-pagination">
                 {{ $products->links('pagination::bootstrap-5') }}
             </div>
         </div>
         @endif
     </div>
 </div>
+
+{{-- Khắc phục triệt để lỗi text lặp lại (Showing X to Y...) của Bootstrap layout --}}
+@push('styles')
+<style>
+    .custom-bootstrap-pagination > nav div:first-child { display: none !important; }
+    .custom-bootstrap-pagination .pagination { margin-bottom: 0 !important; }
+</style>
+@endpush
 @endsection

@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
     {
         // Xóa sạch dữ liệu cũ trong bảng users trước khi nạp tài khoản mới
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('users')->truncate();
+        //DB::table('users')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $now = Carbon::now();
